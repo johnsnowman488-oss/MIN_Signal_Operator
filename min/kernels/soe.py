@@ -34,9 +34,14 @@ class SOEMemory:
 
         for n in range(1, t.size):
             dt = t[n] - t[n - 1]
-            # Exact zero-order-hold update for x(t) over the interval.
+            # Exact update for a piecewise-linear input over the interval.
             decay = np.exp(-self.gammas * dt)
-            q = decay * q + (1.0 - decay) / self.gammas * x[n - 1]
+            slope = (x[n] - x[n - 1]) / dt
+            q = (
+                decay * q
+                + x[n - 1] * (1.0 - decay) / self.gammas
+                + slope * (dt / self.gammas - (1.0 - decay) / self.gammas**2)
+            )
             y[n] = np.sum(self.weights * q)
 
         return y
