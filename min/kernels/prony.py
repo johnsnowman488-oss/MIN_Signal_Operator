@@ -48,7 +48,7 @@ def fit_prony(samples: np.ndarray, dt: float, order: int) -> PronySOE:
     A = np.vstack([y[n:n + order] for n in range(order)])
     b = -y[order:2 * order]
     coeff = np.linalg.solve(A, b)
-    poly = np.r_[coeff, 1.0]
+    poly = np.r_[1.0, coeff[::-1]]
     z = np.roots(poly)
 
     # Discrete exponentials with |z| close to one correspond to slow memory.
