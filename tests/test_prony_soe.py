@@ -30,4 +30,4 @@ def test_soe_matches_direct_memory_operator():
 
     streaming = SOEMemory(weights, gammas).apply(t, x)
 
-    assert np.max(np.abs(direct - streaming)) < 2e-4
+    assert np.max(np.abs(direct - streaming)) < 1e-4
