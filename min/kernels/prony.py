@@ -45,7 +45,7 @@ def fit_prony(samples: np.ndarray, dt: float, order: int) -> PronySOE:
 
     y = samples.astype(np.complex128, copy=False)
     # Sum_{j=0}^p a_j y_{n+j}=0 with a_p=1.
-    A = np.column_stack([y[n:n + order] for n in range(order)])
+    A = np.vstack([y[n:n + order] for n in range(order)])
     b = -y[order:2 * order]
     coeff = np.linalg.solve(A, b)
     poly = np.r_[coeff, 1.0]
