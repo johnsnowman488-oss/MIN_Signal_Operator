@@ -1,0 +1,176 @@
+{
+  "experiment": "11_Multipath_Fading_Receiver",
+  "date": "2026-09-21",
+  "rows": 1440,
+  "signals": [
+    "BPSK",
+    "QPSK",
+    "16QAM"
+  ],
+  "memories": [
+    "identity",
+    "exponential_tau_0.10",
+    "soe_two_scale",
+    "powerlaw_alpha_0.70"
+  ],
+  "channels": [
+    "flat_rayleigh",
+    "multipath_3tap"
+  ],
+  "receivers": [
+    "raw",
+    "fir7",
+    "fir15"
+  ],
+  "snr_db": [
+    0,
+    10,
+    20,
+    30
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "evaluation": "384 held-out symbols after 128-symbol training prefix",
+  "preliminary_selected_results": {
+    "identity/multipath_3tap": {
+      "raw": {
+        "10dB": {
+          "mean_evm_percent": 58.4915,
+          "mean_ber": 0.124
+        },
+        "30dB": {
+          "mean_evm_percent": 50.7501,
+          "mean_ber": 0.07
+        }
+      },
+      "fir7": {
+        "10dB": {
+          "mean_evm_percent": 33.5226,
+          "mean_ber": 0.0398
+        },
+        "30dB": {
+          "mean_evm_percent": 3.5332,
+          "mean_ber": 0
+        }
+      },
+      "fir15": {
+        "10dB": {
+          "mean_evm_percent": 34.8048,
+          "mean_ber": 0.0423
+        },
+        "30dB": {
+          "mean_evm_percent": 3.6807,
+          "mean_ber": 0
+        }
+      }
+    },
+    "exponential_tau_0.10/multipath_3tap": {
+      "raw": {
+        "10dB": {
+          "mean_evm_percent": 97.8477,
+          "mean_ber": 0.4363
+        },
+        "30dB": {
+          "mean_evm_percent": 97.6694,
+          "mean_ber": 0.4342
+        }
+      },
+      "fir7": {
+        "10dB": {
+          "mean_evm_percent": 88.5876,
+          "mean_ber": 0.3432
+        },
+        "30dB": {
+          "mean_evm_percent": 27.3879,
+          "mean_ber": 0.0229
+        }
+      },
+      "fir15": {
+        "10dB": {
+          "mean_evm_percent": 92.0716,
+          "mean_ber": 0.3658
+        },
+        "30dB": {
+          "mean_evm_percent": 27.6232,
+          "mean_ber": 0.0247
+        }
+      }
+    },
+    "soe_two_scale/multipath_3tap": {
+      "raw": {
+        "10dB": {
+          "mean_evm_percent": 99.148,
+          "mean_ber": 0.4616
+        },
+        "30dB": {
+          "mean_evm_percent": 99.0795,
+          "mean_ber": 0.4589
+        }
+      },
+      "fir7": {
+        "10dB": {
+          "mean_evm_percent": 95.242,
+          "mean_ber": 0.4042
+        },
+        "30dB": {
+          "mean_evm_percent": 41.1966,
+          "mean_ber": 0.0689
+        }
+      },
+      "fir15": {
+        "10dB": {
+          "mean_evm_percent": 99.0126,
+          "mean_ber": 0.4191
+        },
+        "30dB": {
+          "mean_evm_percent": 42.6101,
+          "mean_ber": 0.0745
+        }
+      }
+    },
+    "powerlaw_alpha_0.70/multipath_3tap": {
+      "raw": {
+        "10dB": {
+          "mean_evm_percent": 99.6629,
+          "mean_ber": 0.4769
+        },
+        "30dB": {
+          "mean_evm_percent": 99.6037,
+          "mean_ber": 0.4773
+        }
+      },
+      "fir7": {
+        "10dB": {
+          "mean_evm_percent": 99.8946,
+          "mean_ber": 0.4472
+        },
+        "30dB": {
+          "mean_evm_percent": 65.467,
+          "mean_ber": 0.1982
+        }
+      },
+      "fir15": {
+        "10dB": {
+          "mean_evm_percent": 103.9019,
+          "mean_ber": 0.4562
+        },
+        "30dB": {
+          "mean_evm_percent": 67.8929,
+          "mean_ber": 0.2151
+        }
+      }
+    }
+  },
+  "interpretation": [
+    "The identity/multipath control is strongly improved by receiver equalization as SNR increases, reaching essentially zero mean BER at 30 dB in this finite test set.",
+    "The exponential memory case is also substantially improved by FIR equalization at 30 dB, but retains about 27% EVM and about 2.3% mean BER.",
+    "The two-scale and power-law memories retain much larger residual error, indicating that a short symbol-spaced FIR does not fully capture the tested memory structure.",
+    "These are preliminary local numerical reproductions of the experiment equations; the committed repository runner remains the reproducible source of truth."
+  ],
+  "caveat": "No intrinsic MIN advantage is claimed. The next comparison must use conventional FIR/IIR and Volterra or memory-polynomial baselines under matched parameter budgets."
+}
