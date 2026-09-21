@@ -44,22 +44,25 @@ def fit_prony(samples: np.ndarray, dt: float, order: int) -> PronySOE:
         raise ValueError("at least 2*order+1 samples are required")
 
     y = samples.astype(np.complex128, copy=False)
-    # Sum_{j=0}^p a_j y_{n+j}=0 with a_p=1.
     A = np.vstack([y[n:n + order] for n in range(order)])
     b = -y[order:2 * order]
     coeff = np.linalg.solve(A, b)
     poly = np.r_[1.0, coeff[::-1]]
     z = np.roots(poly)
+    if not np.all(np.isfinite(z)) or np.any(z == 0):
+        raise FloatingPointError("Prony produced invalid exponential nodes")
 
-    # Discrete exponentials with |z| close to one correspond to slow memory.
+    # High-order unconstrained fits can create explosive modes. Detect that
+    # before constructing a Vandermonde matrix that would overflow.
+    log_growth = (y.size - 1) * np.log(np.abs(z))
+    if not np.all(np.isfinite(log_growth)) or np.max(log_growth) > 600.0:
+        raise FloatingPointError("Prony produced exponentially explosive modes")
+
     gammas = -np.log(z) / dt
-
     n = np.arange(y.size)
     vandermonde = z[None, :] ** n[:, None]
     weights, *_ = np.linalg.lstsq(vandermonde, y, rcond=None)
 
-    # For a real, non-oscillatory kernel, numerical noise may leave tiny
-    # imaginary parts. Preserve genuinely complex estimates.
     if np.max(np.abs(weights.imag)) < 1e-10 * max(1.0, np.max(np.abs(weights.real))):
         weights = weights.real
     if np.max(np.abs(gammas.imag)) < 1e-10 * max(1.0, np.max(np.abs(gammas.real))):
