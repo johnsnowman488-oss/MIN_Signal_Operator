@@ -136,17 +136,17 @@ def _run_case(signal_name, generator, memory, channel, seed, snr_db):
             )
             estimate = apply_iir_equalizer(observed, b, a)[test]
 
-        params, states, macs, memory = _complexity(receiver)
+        params, states, macs, effective_memory = _complexity(receiver)
         rows.append({
             "experiment": "12A_receiver_recoverability",
-            "signal": signal_name, "memory": globals()["MEMORIES"][globals()["MEMORIES"].index(memory)] if False else memory,
+            "signal": signal_name, "memory": memory,
             "channel": channel, "receiver": receiver, "snr_db": snr_db, "seed": seed,
             "channel_energy": float(np.sum(abs(h) ** 2)),
             "evm_percent": 100 * evm(tx[test], estimate),
             "ber": _ber(signal_name, tx[test], estimate),
             "heldout_mse": float(np.mean(abs(estimate - tx[test]) ** 2)),
             "parameter_count": params, "state_dimension": states,
-            "macs_per_sample": macs, "effective_memory_samples": memory,
+            "macs_per_sample": macs, "effective_memory_samples": effective_memory,
             "pole_radius": pole_radius,
         })
     return rows
