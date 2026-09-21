@@ -1,0 +1,29 @@
+{
+  "experiment": "09_MIN_Digital_Memory_Transform",
+  "date": "2026-09-21",
+  "seeds": [0, 1, 2, 3, 4],
+  "signals": ["BPSK", "QPSK", "16QAM"],
+  "kernels": ["identity", "exponential_tau_0.10", "soe_two_scale", "powerlaw_alpha_0.70"],
+  "metric": "EVM after complex scalar gain fitting",
+  "note": "No noise, channel, equalizer, or BER claim is included. Large EVM is residual waveform/inter-symbol distortion after removing only one complex scalar gain.",
+  "summary": {
+    "BPSK": {
+      "identity": {"mean_evm_percent": 0.0, "std_evm_percent": 0.0},
+      "exponential_tau_0.10": {"mean_evm_percent": 426.0157381779201, "std_evm_percent": 31.5282252591386},
+      "soe_two_scale": {"mean_evm_percent": 725.5516320398193, "std_evm_percent": 64.736484241573},
+      "powerlaw_alpha_0.70": {"mean_evm_percent": 1766.1569313065986, "std_evm_percent": 453.608246730673}
+    },
+    "QPSK": {
+      "identity": {"mean_evm_percent": 0.0, "std_evm_percent": 0.0},
+      "exponential_tau_0.10": {"mean_evm_percent": 403.9683670677872, "std_evm_percent": 19.39438293736321},
+      "soe_two_scale": {"mean_evm_percent": 676.5934333210847, "std_evm_percent": 45.90504178101722},
+      "powerlaw_alpha_0.70": {"mean_evm_percent": 1388.96687563001, "std_evm_percent": 284.0142744126434}
+    },
+    "16QAM": {
+      "identity": {"mean_evm_percent": 2.4830197345043866e-15, "std_evm_percent": 5.552200915825288e-15},
+      "exponential_tau_0.10": {"mean_evm_percent": 422.12917566552824, "std_evm_percent": 17.10616057564589},
+      "soe_two_scale": {"mean_evm_percent": 696.8610552414182, "std_evm_percent": 32.01305726617342},
+      "powerlaw_alpha_0.70": {"mean_evm_percent": 1554.2754658118138, "std_evm_percent": 173.15997813830697}
+    }
+  }
+}
