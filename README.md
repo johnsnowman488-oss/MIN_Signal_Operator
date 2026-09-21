@@ -14,21 +14,91 @@ The initial implementation is deliberately small. It is intended for verificatio
 
 ## Research progression
 
-1. Verify the core memory operator.
-2. Explore kernel families and spectral representations.
-3. Add state-space / sum-of-exponentials (SOE) realizations.
-4. Introduce hierarchical MIN as a controlled extension.
-5. Build the synthetic signal atlas and characterize MIN on elementary waveforms.
-6. Characterize MIN frequency response while separating finite-horizon and startup effects.
-7. Quantify finite-horizon memory scaling across frequency and memory-tail regimes.
-8. Characterize BPSK/QPSK/16-QAM distortion under controlled MIN memory.
-9. Test AWGN receiver compensation and equalization with held-out symbols.
-10. Controlled multipath/fading and receiver equalization.
-11. Separate ordinary channel memory from MIN-induced memory and test receiver undistortion.
-12. Compare linear receiver families (FIR/IIR/state-space/SOE) under matched state, parameter, latency, and MAC budgets.
-13. Add memory-polynomial and Volterra baselines only when a nonlinear-memory condition is explicitly introduced; do not compare nonlinear models to a linear MIN condition as if the tasks were identical.
-14. Quantify whether any observed benefit is preservation/steadiness during propagation, recoverability at the receiver, or simply a different distortion geometry.
-15. Move to real IQ and SDR only after the synthetic mechanism and complexity trade-offs are established.
+The program is now organized around a central question:
+
+> **What does the MIN memory transformation do to an information-bearing signal, how recoverable is that transformation, and when—if ever—does deliberately introducing such memory become useful?**
+
+The roadmap therefore separates **forward transformation**, **propagation**, **receiver recoverability**, and **computational complexity**. It does not assume that MIN preserves signals or improves communication.
+
+1. **Core operator verification** — verify the causal memory operator and basic numerical behavior.
+2. **Kernel and spectral foundation** — characterize exponential, multi-scale, and algebraic-tail kernels and their frequency response.
+3. **SOE/state realization** — represent memory kernels with finite recursive states and validate the continuous-to-discrete relationship.
+4. **Kernel identification** — compare Prony, Matrix Pencil, ESPRIT, Vector Fitting, and NNLS while tracking positivity/stability structure.
+5. **Synthetic signal atlas** — measure how MIN transforms elementary waveforms.
+6. **Frequency and finite-horizon analysis** — distinguish startup/finite-history effects from genuine long-memory behavior.
+7. **Digital communication transformation** — establish BPSK/QPSK/16-QAM distortion under controlled MIN memory.
+8. **AWGN receiver compensation** — test whether conventional receiver memory can undo the transformation on held-out symbols.
+9. **Multipath/fading separation** — separate ordinary propagation distortion from MIN-induced memory.
+10. **Receiver recoverability ladder** — compare raw, finite FIR, longer FIR, IIR/state-space, SOE, and MIN-aware receivers using identical channel/data realizations.
+11. **Matched-complexity study** — compare parameter count, state dimension, latency/memory horizon, MACs/sample, training cost, BER, EVM, and held-out residual rather than declaring a universal winner.
+12. **Forward preservation study** — explicitly measure waveform preservation through propagation, rather than inferring preservation from receiver BER.
+13. **Transform-domain stability study** — test whether a deliberately MIN-transformed representation is more stable under specified propagation disturbances.
+14. **Nonlinear-memory extension** — only after a controlled nonlinear channel is introduced, add memory-polynomial and Volterra baselines and compare them with an explicitly nonlinear MIN extension.
+15. **Robustness and identifiability** — vary memory horizon, kernel family, SNR, fading/multipath realization, training length, and model mismatch; determine when the transformation is identifiable and invertible in practice.
+16. **Real IQ validation** — move to recorded IQ only after the synthetic mechanism and complexity trade-offs are reproducible.
+17. **SDR experiment** — test a constrained real-time implementation after the signal/receiver hypotheses survive offline validation.
+18. **Performance engineering** — optimize Python/C++/streaming implementations only after experiments identify a justified computational bottleneck.
+
+### Interpretation ladder
+
+The research should distinguish four increasingly strong conclusions:
+
+[
+oxed{
+	ext{MIN transforms signals}
+;
+otRightarrow;
+	ext{MIN preserves signals}
+;
+otRightarrow;
+	ext{MIN is efficiently invertible}
+;
+otRightarrow;
+	ext{MIN improves propagation}
+}
+]
+
+A positive result at each stage must therefore be demonstrated independently.
+
+### Current stage
+
+Experiments 01–11 establish the numerical/operator foundation, kernel identification, signal atlas, spectral/finite-horizon behavior, digital-signal distortion, AWGN compensation, and controlled multipath/fading receiver behavior.
+
+The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 11 does not establish irreversibility, signal preservation, or a communication advantage.
+
+The immediate research target is therefore:
+
+[
+oxed{
+	ext{MIN transform}
+ightarrow
+	ext{propagation}
+ightarrow
+	ext{receiver}
+ightarrow
+	ext{recoverability}
+ightarrow
+	ext{complexity}
+}
+]
+
+with matched controls at every stage.
+
+### Baseline policy
+
+The present MIN operator is linear. Therefore the primary receiver comparison is:
+
+[
+	ext{FIR}
+ightarrow
+	ext{IIR/state-space}
+ightarrow
+	ext{SOE/MIN-aware receiver}.
+]
+
+Volterra and memory-polynomial models are deferred until a nonlinear-memory condition exists. Introducing them earlier would compare a nonlinear model class against a linear MIN condition without a matched task.
+
+The project deliberately keeps **continuous MIN**, its **sampled/discrete realization**, and the **communication channel** as separate layers.
 
 ## Repository structure
 
