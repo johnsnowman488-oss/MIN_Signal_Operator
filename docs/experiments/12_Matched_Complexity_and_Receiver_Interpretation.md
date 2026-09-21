@@ -1,0 +1,290 @@
+# Experiment 12 — Matched-Complexity Receiver Baselines
+
+## Purpose
+
+Experiment 11 established that the tested MIN memory transformations can produce large temporal distortion and that short FIR equalizers can remove much of ordinary multipath distortion while leaving larger residual error for multi-scale and long-tail memory.
+
+Experiment 12 is **not** a search for a model that "wins". Its primary question is:
+
+> **How much receiver model complexity is required to reproduce or undo the same memory distortion?**
+
+This distinction is important because the present MIN operator is a **linear causal memory operator**. A nonlinear Volterra or memory-polynomial model is not a directly matched baseline unless the experiment also introduces nonlinear channel distortion.
+
+## 12A — Linear matched-memory comparison
+
+The first comparison should remain linear:
+
+\[
+\text{FIR}\;\rightarrow\;\text{IIR}\;\rightarrow\;\text{low-order state-space/SOE}\;\rightarrow\;\text{MIN/SOE}.
+\]
+
+The tested channel should retain the Experiment 11 ladder:
+
+\[
+\text{identity}
+\rightarrow
+\text{ordinary multipath}
+\rightarrow
+\text{single-scale memory}
+\rightarrow
+\text{multi-scale memory}
+\rightarrow
+\text{algebraic-tail memory}.
+\]
+
+The receiver is trained only on the designated prefix and evaluated on held-out symbols.
+
+### Required controls
+
+1. **Identity + AWGN** — establishes the noise floor.
+2. **Identity + multipath** — validates ordinary equalization.
+3. **MIN memory only + AWGN** — isolates the transformation itself.
+4. **MIN memory + multipath + AWGN** — tests the combined problem.
+5. **Power-law memory at several horizons** — tests whether finite receiver memory can track increasing history.
+
+## Complexity must be explicit
+
+For every receiver report, record at least:
+
+- number of fitted parameters;
+- internal state dimension;
+- effective memory/latency;
+- multiply-accumulate operations per output sample;
+- training observations and training cost;
+- inference cost;
+- numerical conditioning/stability constraints;
+- BER;
+- EVM;
+- held-out residual error.
+
+The main plots should therefore include:
+
+\[
+\boxed{\text{BER/EVM versus state dimension}}
+\]
+
+and
+
+\[
+\boxed{\text{BER/EVM versus MACs per sample}}.
+\]
+
+A second useful quantity is the **required complexity to reach a predefined error target**. This turns the experiment into a reproducible resource comparison rather than a qualitative claim that one architecture is "better".
+
+## Important fairness rule
+
+Tap count alone is not a sufficient complexity measure.
+
+For example, FIR-15 and a two-pole state-space model have very different state and computational structures. Likewise, an SOE realization may represent a long physical history with a small number of recursive states.
+
+Therefore the comparison should preserve, where possible:
+
+- comparable parameter count;
+- comparable state dimension;
+- comparable inference arithmetic;
+- comparable training data;
+- identical channel realizations;
+- identical noise realizations;
+- identical held-out evaluation symbols.
+
+When exact equality is impossible, report the actual budget instead of pretending that the models are matched.
+
+## 12B — Nonlinear-memory baselines
+
+Memory-polynomial and Volterra models should be introduced only after a nonlinear condition exists.
+
+A fair nonlinear experiment would add a channel such as
+
+\[
+y[n] = \sum_{p\in\mathcal P}\sum_m a_{p,m}x[n-m]|x[n-m]|^{p-1}
+\]
+
+or a controlled truncated Volterra channel.
+
+Then the comparison becomes meaningful:
+
+\[
+\text{FIR/IIR}
+\quad vs\quad
+\text{memory polynomial}
+\quad vs\quad
+\text{Volterra}
+\quad vs\quad
+\text{nonlinear MIN extension}.
+\]
+
+Until that condition is introduced, nonlinear baselines should be treated as intentionally over-general reference models, not as equivalent competitors to the current linear MIN operator.
+
+## Continuous-to-discrete distinction
+
+The research should keep three layers separate:
+
+\[
+\boxed{
+\text{continuous MIN operator}
+\rightarrow
+\text{sampled/discrete MIN realization}
+\rightarrow
+\text{communication channel}
+}
+\]
+
+Experiment 11 operates at the sampled communication layer. It therefore demonstrates behavior of the **discrete realization used by the communication experiment**, not by itself a universal statement about the continuous-time operator.
+
+## What Experiment 11 already tells us
+
+The preliminary Experiment 11 results provide a useful mechanism signal:
+
+- the identity/multipath control becomes nearly error-free at 30 dB after FIR equalization in the tested finite data set;
+- exponential memory is substantially reduced by FIR equalization but retains about 27% EVM and about 2.3% BER at 30 dB;
+- two-scale and power-law memory retain progressively larger residual errors.
+
+The interpretation should be:
+
+> finite conventional receiver memory does not necessarily reproduce the temporal structure generated by the tested long-memory kernels.
+
+It should **not** yet be:
+
+> MIN is superior to conventional signal processing.
+
+The next experiment is specifically designed to determine whether the residual is due to insufficient memory length, inefficient representation, poor conditioning, a receiver-design limitation, or an intrinsic property of the chosen transformation.
+
+## Research question: distortion or useful transformation?
+
+The MIN operator
+
+\[
+(M_Kx)(t)=\int_0^tK(t-s)x(s)\,ds
+\]
+
+is a transformation. For a non-identity kernel it generally changes amplitude, phase, temporal correlation, transients, and frequency response. Therefore it should be expected to **distort the original signal relative to an information-preserving identity path** unless the transformation is deliberately used as part of the signal representation.
+
+The potentially interesting question is not whether MIN "avoids distortion". It is whether MIN can produce a transformed representation whose temporal structure is:
+
+1. stable or smoother under a specified propagation model;
+2. more predictable using a compact state representation;
+3. more robust to a specified class of propagation disturbances;
+4. recoverable at the receiver with lower required complexity;
+5. useful for a communication objective even though the waveform itself is not preserved.
+
+These are separate hypotheses and must be tested separately.
+
+## Preservation versus recoverability
+
+Define three distinct quantities:
+
+### 1. Forward preservation
+
+Compare the transmitted and received/propagated waveform directly:
+
+\[
+E_{\mathrm{forward}}
+=
+\frac{\|y-x\|^2}{\|x\|^2}.
+\]
+
+This asks whether the waveform itself survives.
+
+### 2. Receiver recoverability
+
+After a receiver \(R\),
+
+\[
+\hat{x}=R(y),
+\]
+
+measure
+
+\[
+E_{\mathrm{recover}}
+=
+\frac{\|\hat{x}-x\|^2}{\|x\|^2},
+\]
+
+along with BER and EVM.
+
+This asks whether the original information-bearing signal can be recovered.
+
+### 3. Representation stability
+
+If MIN is intentionally part of the transmitter/receiver representation, compare a transformed-domain quantity before and after propagation rather than insisting that \(y\approx x\).
+
+This asks whether the **transformation itself** behaves more stably under the chosen channel.
+
+Only the third hypothesis could support a claim that MIN is useful as a propagation-oriented representation. Experiments 09–11 primarily establish distortion and recoverability behavior; they do not yet establish propagation preservation.
+
+## Receiver interpretation
+
+The current receiver variants answer a narrower question:
+
+> **Can a finite conventional equalizer learn enough of the MIN-induced memory to undo it on held-out symbols?**
+
+The Experiment 11 results say **partly yes** for the tested conditions:
+
+- FIR-7 and FIR-15 substantially reduce error in several cases;
+- increasing from 7 to 15 taps does not automatically remove the long-memory residual;
+- the power-law case remains substantially distorted even at high SNR.
+
+This does not yet prove that the transform is irreversible. It only shows that the tested finite FIR family did not fully invert it under the tested training and channel conditions.
+
+An SOE/state-space receiver is especially important because the same long history can sometimes be represented recursively. If such a receiver can recover the signal accurately with a small state dimension, then the Experiment 11 residual would be explained as a **representation mismatch**, not a fundamental non-invertibility.
+
+## The central experiment after 11
+
+The most informative next ladder is therefore:
+
+\[
+\boxed{
+\text{raw}
+\rightarrow
+\text{FIR-7}
+\rightarrow
+\text{FIR-15}
+\rightarrow
+\text{FIR-31}
+\rightarrow
+\text{IIR/state-space}
+\rightarrow
+\text{SOE/MIN-aware receiver}
+}
+\]
+
+with identical data and channel realizations.
+
+If the required complexity grows sharply as the kernel develops a longer tail, that is evidence of a memory-complexity trade-off.
+
+If a compact SOE/MIN-aware receiver recovers the signal with much lower state/MAC budget, that is evidence for an efficient representation.
+
+If no receiver family can recover it under conditions where the transform is mathematically invertible, then implementation, conditioning, finite-history effects, or receiver training must be investigated before any stronger conclusion.
+
+## No premature advantage claim
+
+The current scientific position should remain:
+
+\[
+\boxed{
+\text{MIN demonstrably transforms signals}
+\neq
+\text{MIN preserves signals}
+\neq
+\text{MIN improves communication}
+}
+\]
+
+The experiments are now positioned to determine which, if any, of the following is true:
+
+\[
+\text{MIN is merely a distortion mechanism},
+\]
+
+\[
+\text{MIN is a compact long-memory representation},
+\]
+
+or
+
+\[
+\text{MIN can be engineered into a useful propagation/receiver architecture}.
+\]
+
+That distinction is the central research question for the next stage.
