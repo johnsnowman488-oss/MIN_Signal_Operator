@@ -23,9 +23,9 @@ The initial implementation is deliberately small. It is intended for verificatio
 7. Quantify finite-horizon memory scaling across frequency and memory-tail regimes.
 8. Characterize BPSK/QPSK/16-QAM distortion under controlled MIN memory.
 9. Test AWGN receiver compensation and equalization with held-out symbols.
-10. Add controlled multipath/fading and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
-11. Test synthetic communication signals, then real IQ and SDR.
-12. Profile and optimize only after experiments justify it.
+10. Controlled multipath/fading and receiver equalization.
+11. Benchmark against conventional FIR/IIR, Volterra, and memory-polynomial baselines.
+12. Test synthetic communication signals, then real IQ and SDR; profile and optimize only after experiments justify it.
 
 ## Repository structure
 
@@ -54,4 +54,4 @@ The notebooks are experiments rather than the source of truth; reusable logic be
 
 ## Status
 
-Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Experiment 09 establishes that the tested memory transformations produce substantial temporal distortion in sampled digital signals. Experiment 10 tests whether that distortion is compensable by a receiver using controlled AWGN and a held-out 7-tap FIR equalizer. These results do not assume or establish a communication advantage for MIN.
+Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Experiment 09 establishes that the tested memory transformations produce substantial temporal distortion in sampled digital signals. Experiment 10 tests whether that distortion is compensable by a receiver using controlled AWGN and held-out FIR equalization. Experiment 11 adds normalized flat Rayleigh and 3-tap multipath channels. Preliminary numerical reproduction shows conventional channel distortion is strongly reduced by FIR equalization, while the tested long-memory cases retain substantial residual distortion at high SNR. These observations do not establish a communication advantage for MIN.
