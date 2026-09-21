@@ -17,3 +17,12 @@ def test_complex_iq_is_supported():
     y = MemoryOperator(lambda lag: exponential_kernel(lag, 0.1)).apply(t, x)
     assert np.iscomplexobj(y)
     assert np.isfinite(y).all()
+
+
+def test_complex_kernel_with_real_signal_is_supported():
+    t = np.linspace(0.0, 1.0, 101)
+    x = np.ones_like(t)
+    kernel = lambda lag: np.exp(-(1.0 + 0.5j) * lag)
+    y = MemoryOperator(kernel).apply(t, x)
+    assert np.iscomplexobj(y)
+    assert np.isfinite(y).all()
