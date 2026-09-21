@@ -42,7 +42,7 @@ The Experiment 11 conditions are retained:
 
 - BPSK, QPSK, 16-QAM;
 - identity, exponential, two-scale SOE, and power-law memory;
-- flat Rayleigh and normalized 3-tap multipath;
+- identity, flat Rayleigh, and normalized 3-tap multipath;
 - 0, 10, 20, 30 dB SNR;
 - five deterministic seeds;
 - 128-symbol training prefix;
@@ -51,7 +51,7 @@ The Experiment 11 conditions are retained:
 This gives:
 
 \[
-3\times4\times2\times4\times5\times7=3360
+3\times4\times3\times4\times5\times7=5040
 \]
 
 receiver-condition rows.
@@ -101,13 +101,14 @@ predefined EVM or BER targets, when a target is reached.
 
 ## Required controls
 
-1. **identity + AWGN** — establishes the noise/reference floor;
-2. **identity + multipath** — validates conventional equalization;
-3. **memory + AWGN** — isolates the discrete memory transformation;
-4. **memory + multipath + AWGN** — tests the combined problem.
+1. **identity channel + AWGN** — establishes the noise/reference floor;
+2. **identity channel + multipath + AWGN** — validates conventional equalization;
+3. **MIN memory + identity channel + AWGN** — isolates the discrete memory transformation;
+4. **MIN memory + multipath + AWGN** — tests the combined problem.
 
-The experiment keeps both channel families so the first and third controls are
-represented by flat-fading cases while multipath cases expose ordinary ISI.
+The explicit identity channel is included so the memory-only control is genuinely
+separable from fading. Flat Rayleigh remains a controlled fading condition, while
+3-tap multipath exposes ordinary ISI.
 
 ## Interpretation
 
