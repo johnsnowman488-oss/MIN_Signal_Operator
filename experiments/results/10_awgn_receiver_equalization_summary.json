@@ -1,0 +1,278 @@
+{
+  "experiment": "10_AWGN_Receiver_Equalization",
+  "date": "2026-09-21",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "signals": [
+    "BPSK",
+    "QPSK",
+    "16QAM"
+  ],
+  "kernels": [
+    "identity",
+    "exponential_tau_0.10",
+    "soe_two_scale",
+    "powerlaw_alpha_0.70"
+  ],
+  "receivers": [
+    "raw",
+    "scalar",
+    "fir7"
+  ],
+  "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30
+  ],
+  "rows": 1260,
+  "aggregation": "mean across the 3 signal types and 5 seeds; selected SNRs shown",
+  "equalizer": {
+    "type": "causal symbol-spaced complex FIR",
+    "taps": 7,
+    "training_symbols": 128,
+    "ridge": 0.000001,
+    "evaluation_symbols": 384
+  },
+  "selected_mean_results": {
+    "identity": {
+      "raw": {
+        "0dB": {
+          "evm_percent": 101.0479,
+          "ber": 0.203906
+        },
+        "10dB": {
+          "evm_percent": 31.6443,
+          "ber": 0.026172
+        },
+        "20dB": {
+          "evm_percent": 10.0124,
+          "ber": 0
+        },
+        "30dB": {
+          "evm_percent": 3.162,
+          "ber": 0
+        }
+      },
+      "scalar": {
+        "0dB": {
+          "evm_percent": 100.5669,
+          "ber": 0.205425
+        },
+        "10dB": {
+          "evm_percent": 32.0196,
+          "ber": 0.025955
+        },
+        "20dB": {
+          "evm_percent": 10.0563,
+          "ber": 0
+        },
+        "30dB": {
+          "evm_percent": 3.173,
+          "ber": 0
+        }
+      },
+      "fir7": {
+        "0dB": {
+          "evm_percent": 73.6076,
+          "ber": 0.225087
+        },
+        "10dB": {
+          "evm_percent": 31.0917,
+          "ber": 0.030122
+        },
+        "20dB": {
+          "evm_percent": 10.3309,
+          "ber": 0
+        },
+        "30dB": {
+          "evm_percent": 3.2484,
+          "ber": 0
+        }
+      }
+    },
+    "exponential_tau_0.10": {
+      "raw": {
+        "0dB": {
+          "evm_percent": 99.5587,
+          "ber": 0.460503
+        },
+        "10dB": {
+          "evm_percent": 99.5219,
+          "ber": 0.439931
+        },
+        "20dB": {
+          "evm_percent": 99.5176,
+          "ber": 0.435069
+        },
+        "30dB": {
+          "evm_percent": 99.5195,
+          "ber": 0.4375
+        }
+      },
+      "scalar": {
+        "0dB": {
+          "evm_percent": 639.956,
+          "ber": 0.456163
+        },
+        "10dB": {
+          "evm_percent": 506.6772,
+          "ber": 0.434332
+        },
+        "20dB": {
+          "evm_percent": 463.3353,
+          "ber": 0.431424
+        },
+        "30dB": {
+          "evm_percent": 468.1265,
+          "ber": 0.431424
+        }
+      },
+      "fir7": {
+        "0dB": {
+          "evm_percent": 101.1224,
+          "ber": 0.466146
+        },
+        "10dB": {
+          "evm_percent": 90.5197,
+          "ber": 0.367405
+        },
+        "20dB": {
+          "evm_percent": 66.2341,
+          "ber": 0.195399
+        },
+        "30dB": {
+          "evm_percent": 36.6016,
+          "ber": 0.049219
+        }
+      }
+    },
+    "soe_two_scale": {
+      "raw": {
+        "0dB": {
+          "evm_percent": 99.6612,
+          "ber": 0.479427
+        },
+        "10dB": {
+          "evm_percent": 99.5832,
+          "ber": 0.464149
+        },
+        "20dB": {
+          "evm_percent": 99.5757,
+          "ber": 0.462587
+        },
+        "30dB": {
+          "evm_percent": 99.5788,
+          "ber": 0.464931
+        }
+      },
+      "scalar": {
+        "0dB": {
+          "evm_percent": 1067.0031,
+          "ber": 0.480122
+        },
+        "10dB": {
+          "evm_percent": 917.3766,
+          "ber": 0.459722
+        },
+        "20dB": {
+          "evm_percent": 788.2569,
+          "ber": 0.46072
+        },
+        "30dB": {
+          "evm_percent": 803.0792,
+          "ber": 0.4602
+        }
+      },
+      "fir7": {
+        "0dB": {
+          "evm_percent": 102.0281,
+          "ber": 0.481858
+        },
+        "10dB": {
+          "evm_percent": 95.75,
+          "ber": 0.415148
+        },
+        "20dB": {
+          "evm_percent": 77.4536,
+          "ber": 0.275
+        },
+        "30dB": {
+          "evm_percent": 47.5256,
+          "ber": 0.08954
+        }
+      }
+    },
+    "powerlaw_alpha_0.70": {
+      "raw": {
+        "0dB": {
+          "evm_percent": 100.1489,
+          "ber": 0.49349
+        },
+        "10dB": {
+          "evm_percent": 99.8415,
+          "ber": 0.480729
+        },
+        "20dB": {
+          "evm_percent": 99.8134,
+          "ber": 0.483594
+        },
+        "30dB": {
+          "evm_percent": 99.8205,
+          "ber": 0.482378
+        }
+      },
+      "scalar": {
+        "0dB": {
+          "evm_percent": 2756.7275,
+          "ber": 0.492708
+        },
+        "10dB": {
+          "evm_percent": 2666.816,
+          "ber": 0.485286
+        },
+        "20dB": {
+          "evm_percent": 1983.1532,
+          "ber": 0.478602
+        },
+        "30dB": {
+          "evm_percent": 2091.6168,
+          "ber": 0.478472
+        }
+      },
+      "fir7": {
+        "0dB": {
+          "evm_percent": 102.9841,
+          "ber": 0.499957
+        },
+        "10dB": {
+          "evm_percent": 100.4686,
+          "ber": 0.46224
+        },
+        "20dB": {
+          "evm_percent": 91.5089,
+          "ber": 0.373481
+        },
+        "30dB": {
+          "evm_percent": 68.4362,
+          "ber": 0.209505
+        }
+      }
+    }
+  },
+  "observations": [
+    "For memory cases, raw/scalar BER remains near random-decision levels as SNR rises because temporal memory distortion dominates AWGN.",
+    "The 7-tap equalizer reduces BER substantially for exponential and two-scale memory at high SNR, but does not fully invert the power-law case.",
+    "Scalar gain compensation is insufficient for these memory transformations.",
+    "Identity is an AWGN sanity baseline; at 20–30 dB its BER is zero in this finite test set."
+  ],
+  "caveat": "These results test receiver-side compensability; they do not establish an intrinsic communication advantage for MIN."
+}
