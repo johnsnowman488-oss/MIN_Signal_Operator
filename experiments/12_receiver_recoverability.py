@@ -29,7 +29,7 @@ from min.signals import generate_16qam, generate_bpsk, generate_qpsk
 
 SIGNALS = {"BPSK": generate_bpsk, "QPSK": generate_qpsk, "16QAM": generate_16qam}
 MEMORIES = ("identity", "exponential_tau_0.10", "soe_two_scale", "powerlaw_alpha_0.70")
-CHANNELS = ("flat_rayleigh", "multipath_3tap")
+CHANNELS = ("identity", "flat_rayleigh", "multipath_3tap")
 RECEIVERS = ("raw", "fir7", "fir15", "fir31", "iir2", "iir4", "iir8")
 SNR_DB = (0.0, 10.0, 20.0, 30.0)
 NUM_SYMBOLS = 512
@@ -86,6 +86,8 @@ def _memory_filter(x, name):
 
 
 def _channel(x, name, rng):
+    if name == "identity":
+        return x, np.array([1.0 + 0.0j])
     if name == "flat_rayleigh":
         h = (rng.normal() + 1j * rng.normal()) / np.sqrt(2)
         h /= max(abs(h), 1e-12)
