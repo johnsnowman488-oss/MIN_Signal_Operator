@@ -20,9 +20,10 @@ The initial implementation is deliberately small. It is intended for verificatio
 4. Introduce hierarchical MIN as a controlled extension.
 5. Build the synthetic signal atlas and characterize MIN on elementary waveforms.
 6. Characterize MIN frequency response while separating finite-horizon and startup effects.
-7. Add controlled noise/channels and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
-8. Test synthetic communication signals, then real IQ and SDR.
-9. Profile and optimize only after experiments justify it.
+7. Quantify finite-horizon memory scaling across frequency and memory-tail regimes.
+8. Add controlled noise/channels and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
+9. Test synthetic communication signals, then real IQ and SDR.
+10. Profile and optimize only after experiments justify it.
 
 ## Repository structure
 
@@ -51,4 +52,4 @@ The notebooks are experiments rather than the source of truth; reusable logic be
 
 ## Status
 
-Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Claims about signal-processing benefit, robustness, or communication performance remain experimental questions and are not assumed by the implementation.
+Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Claims about signal-processing benefit, robustness, or communication performance remain experimental questions and are not assumed by the implementation.
