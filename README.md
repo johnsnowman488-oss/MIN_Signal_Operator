@@ -21,9 +21,10 @@ The initial implementation is deliberately small. It is intended for verificatio
 5. Build the synthetic signal atlas and characterize MIN on elementary waveforms.
 6. Characterize MIN frequency response while separating finite-horizon and startup effects.
 7. Quantify finite-horizon memory scaling across frequency and memory-tail regimes.
-8. Add controlled noise/channels and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
-9. Test synthetic communication signals, then real IQ and SDR.
-10. Profile and optimize only after experiments justify it.
+8. Characterize BPSK/QPSK/16-QAM distortion under controlled MIN memory.
+9. Add controlled noise/channels and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
+10. Test synthetic communication signals, then real IQ and SDR.
+11. Profile and optimize only after experiments justify it.
 
 ## Repository structure
 
