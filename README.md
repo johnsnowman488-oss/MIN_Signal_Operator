@@ -6,9 +6,9 @@ A research laboratory for the Memory-Integrated Network (MIN) signal operator.
 
 This repository begins with a transparent reference implementation of the causal memory operator
 
-\[
-(Mf)(t)=\int_0^t K(t-s)f(s)\,ds.
-\]
+$$
+(Mf)(t)=\\int_0^t K(t-s)f(s)\\,ds.
+$$
 
 The initial implementation is deliberately small. It is intended for verification and experiments, not production performance.
 
@@ -22,9 +22,10 @@ The initial implementation is deliberately small. It is intended for verificatio
 6. Characterize MIN frequency response while separating finite-horizon and startup effects.
 7. Quantify finite-horizon memory scaling across frequency and memory-tail regimes.
 8. Characterize BPSK/QPSK/16-QAM distortion under controlled MIN memory.
-9. Add controlled noise/channels and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
-10. Test synthetic communication signals, then real IQ and SDR.
-11. Profile and optimize only after experiments justify it.
+9. Test AWGN receiver compensation and equalization with held-out symbols.
+10. Add controlled multipath/fading and benchmark against FIR, IIR, Volterra, and memory-polynomial baselines.
+11. Test synthetic communication signals, then real IQ and SDR.
+12. Profile and optimize only after experiments justify it.
 
 ## Repository structure
 
@@ -49,8 +50,8 @@ The frequency-response experiment uses SciPy's weighted oscillatory quadrature f
 pip install -e ".[research]"
 ```
 
-The notebooks are experiments rather than the source of truth; reusable logic belongs in `min/` and tests should accompany numerical claims.
+The notebooks are experiments rather than the source of truth; reusable logic belongs in min/ and tests should accompany numerical claims.
 
 ## Status
 
-Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Claims about signal-processing benefit, robustness, or communication performance remain experimental questions and are not assumed by the implementation.
+Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Experiment 09 establishes that the tested memory transformations produce substantial temporal distortion in sampled digital signals. Experiment 10 tests whether that distortion is compensable by a receiver using controlled AWGN and a held-out 7-tap FIR equalizer. These results do not assume or establish a communication advantage for MIN.
