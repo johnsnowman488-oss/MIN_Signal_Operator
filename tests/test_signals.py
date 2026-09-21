@@ -18,7 +18,7 @@ def test_time_axis_and_unit_energy():
     assert t.size == 101
     assert t[-1] == 1.0
     x = np.array([1.0, -2.0, 2.0])
-    assert unit_energy(x).dot(unit_energy(x)) == np.testing.assert_approx_equal(1.0)
+    assert np.isclose(np.sum(np.abs(unit_energy(x)) ** 2), 1.0)
 
 
 def test_elementary_generators_return_finite_records():
