@@ -1,0 +1,32 @@
+{
+  "reference": {
+    "alpha": 0.7,
+    "tau": 0.5,
+    "dt": 0.02,
+    "horizon": 8.0,
+    "samples": 401,
+    "laplace_samples": 120
+  },
+  "results": [
+    {"method":"prony","order":2,"kernel_rel":0.4046599,"operator_rel":0.3003764,"stable":true,"real_modes":true,"nonnegative_weights":false,"positive_real_soe":false,"status":"ok"},
+    {"method":"prony","order":4,"kernel_rel":0.1912317,"operator_rel":0.1295485,"stable":true,"real_modes":true,"nonnegative_weights":false,"positive_real_soe":false,"status":"ok"},
+    {"method":"prony","order":8,"kernel_rel":0.9999272,"operator_rel":1.0,"stable":false,"real_modes":false,"nonnegative_weights":true,"positive_real_soe":false,"status":"ok"},
+    {"method":"prony","order":16,"kernel_rel":null,"operator_rel":null,"stable":false,"real_modes":false,"nonnegative_weights":false,"positive_real_soe":false,"status":"failed","error":"FloatingPointError: Prony produced exponentially explosive modes"},
+    {"method":"matrix_pencil","order":2,"kernel_rel":0.0207024,"operator_rel":0.0294,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"matrix_pencil","order":4,"kernel_rel":0.0002459749,"operator_rel":0.0002779405,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"matrix_pencil","order":8,"kernel_rel":2.545275e-8,"operator_rel":2.500107e-8,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"matrix_pencil","order":16,"kernel_rel":7.871595e-13,"operator_rel":1.229268e-12,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"esprit","order":2,"kernel_rel":0.02068386,"operator_rel":0.02934013,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"esprit","order":4,"kernel_rel":0.0002447336,"operator_rel":0.0002772234,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"esprit","order":8,"kernel_rel":2.520679e-8,"operator_rel":2.469218e-8,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"esprit","order":16,"kernel_rel":6.103338e-14,"operator_rel":8.92718e-14,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"vector_fitting","order":2,"kernel_rel":0.06466867,"operator_rel":0.08553756,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"vector_fitting","order":4,"kernel_rel":0.003868189,"operator_rel":0.005838247,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"vector_fitting","order":8,"kernel_rel":2.237027e-5,"operator_rel":3.524054e-5,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"vector_fitting","order":16,"kernel_rel":8.308384e-8,"operator_rel":1.374996e-7,"stable":true,"real_modes":true,"nonnegative_weights":false,"positive_real_soe":false,"status":"ok"},
+    {"method":"nnls","order":2,"kernel_rel":0.3815619,"operator_rel":0.5107018,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"nnls","order":4,"kernel_rel":0.02508198,"operator_rel":0.03556385,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"nnls","order":8,"kernel_rel":0.0001569975,"operator_rel":0.0001748230,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"},
+    {"method":"nnls","order":16,"kernel_rel":6.461486e-6,"operator_rel":1.023464e-5,"stable":true,"real_modes":true,"nonnegative_weights":true,"positive_real_soe":true,"status":"ok"}
+  ]
+}
