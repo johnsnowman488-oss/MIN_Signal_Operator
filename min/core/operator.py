@@ -25,7 +25,10 @@ class MemoryOperator:
         if np.any(np.diff(t) <= 0):
             raise ValueError("t must be strictly increasing")
 
-        y = np.zeros_like(f, dtype=np.result_type(f, float))
+        # Probe the kernel once so complex-valued kernel models are preserved
+        # even when the input signal itself is real.
+        kernel_probe = np.asarray(self.kernel(np.array([0.0])))
+        y = np.zeros_like(f, dtype=np.result_type(f, kernel_probe, float))
         for i in range(t.size):
             lag = t[i] - t[: i + 1]
             values = self.kernel(lag) * f[: i + 1]
