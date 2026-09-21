@@ -12,7 +12,7 @@ dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
-notebook = ["jupyter>=1", "matplotlib>=3.7"]
+notebook = ["jupyter>=1", "matplotlib>=3.7", "scipy>=1.10"]
 
 [tool.setuptools.packages.find]
 include = ["min*"]
