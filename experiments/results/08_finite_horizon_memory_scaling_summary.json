@@ -1,0 +1,38 @@
+{
+  "experiment": "08_MIN_Finite_Horizon_Memory_Scaling",
+  "date": "2026-09-21",
+  "settings": {
+    "dt_s": 0.002,
+    "horizons_s": [0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0],
+    "omega_rad_s": [0.25, 0.5, 1.0, 2.0, 4.0, 8.0],
+    "error_definition": "|H_T-H_inf|/|H_inf|",
+    "powerlaw_dc_note": "alpha <= 1 has divergent DC integral; only nonzero-frequency oscillatory responses are compared.",
+    "finite_window_method": "exact for exponential; weighted finite-interval oscillatory quadrature for power-law"
+  },
+  "summary": {
+    "exponential_tau_0.10": {
+      "points": 48,
+      "max_error_at_shortest_horizon": 0.006737946999085549,
+      "median_error_at_8s": 1.3942691523205398e-16,
+      "max_error_at_64s": 1.6711069443220838e-16
+    },
+    "powerlaw_alpha_0.50_tau_0.50": {
+      "points": 48,
+      "max_error_at_shortest_horizon": 0.8941579070243283,
+      "median_error_at_8s": 0.3089729847158233,
+      "max_error_at_64s": 0.18531524667831803
+    },
+    "powerlaw_alpha_0.70_tau_0.50": {
+      "points": 48,
+      "max_error_at_shortest_horizon": 0.8377785995283922,
+      "median_error_at_8s": 0.19236383700325038,
+      "max_error_at_64s": 0.09029945276701506
+    },
+    "powerlaw_alpha_0.90_tau_0.50": {
+      "points": 48,
+      "max_error_at_shortest_horizon": 0.7772494401332096,
+      "median_error_at_8s": 0.11949367691424422,
+      "max_error_at_64s": 0.04307807983261695
+    }
+  }
+}
