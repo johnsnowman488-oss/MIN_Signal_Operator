@@ -24,8 +24,11 @@ The initial implementation is deliberately small. It is intended for verificatio
 8. Characterize BPSK/QPSK/16-QAM distortion under controlled MIN memory.
 9. Test AWGN receiver compensation and equalization with held-out symbols.
 10. Controlled multipath/fading and receiver equalization.
-11. Benchmark against conventional FIR/IIR, Volterra, and memory-polynomial baselines.
-12. Test synthetic communication signals, then real IQ and SDR; profile and optimize only after experiments justify it.
+11. Separate ordinary channel memory from MIN-induced memory and test receiver undistortion.
+12. Compare linear receiver families (FIR/IIR/state-space/SOE) under matched state, parameter, latency, and MAC budgets.
+13. Add memory-polynomial and Volterra baselines only when a nonlinear-memory condition is explicitly introduced; do not compare nonlinear models to a linear MIN condition as if the tasks were identical.
+14. Quantify whether any observed benefit is preservation/steadiness during propagation, recoverability at the receiver, or simply a different distortion geometry.
+15. Move to real IQ and SDR only after the synthetic mechanism and complexity trade-offs are established.
 
 ## Repository structure
 
