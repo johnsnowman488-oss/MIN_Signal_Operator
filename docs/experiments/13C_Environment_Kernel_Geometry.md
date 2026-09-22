@@ -91,7 +91,7 @@ The same finite-horizon SOE Gram matrix from 13B is used:
 
 G_ij = (1-exp(-(gamma_i+gamma_j)T))/(gamma_i+gamma_j).
 
-Recorded descriptors include basis participation dimension, entropy dimension, rank thresholds, condition number, and maximum normalized coherence.
+Recorded descriptors include unweighted dictionary basis participation/entropy geometry as a control, plus **kernel-weighted basis geometry** obtained from diag(sqrt(w)) G diag(sqrt(w)). The weighted geometry is the environment-dependent bridge because the fixed decay-rate dictionary alone is identical across environment families.
 
 ### MIN state geometry
 
@@ -100,6 +100,12 @@ The same causal exponential state realization is applied to the controlled digit
 The distinction remains:
 
 L != D_eff != D_basis != D_state.
+
+For 13C-1, the mechanistic bridge is refined to:
+
+environment → fitted kernel weights → weighted basis geometry → weighted state geometry.
+
+The unweighted basis/state quantities remain controls, so the experiment does not accidentally attribute an environment effect to a fixed dictionary that was held constant by design.
 
 ## Interpretation boundary
 
