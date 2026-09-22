@@ -102,17 +102,23 @@ def sampled_impulse_custom(w, g, n):
 
 def state_impulse(mem, model_kind):
     if model_kind == "exact":
-        return E.state_model(mem, 512)[4]
-    w, g = perturb_memory(mem)
-    # Reproduce the fixed-pole construction used by 12C for the perturbed SOE.
-    h = sampled_impulse_custom(w, g, 512)
-    poles = np.exp(-g / SYMBOL_RATE)
+        w, g = SOE_MEMORIES[mem]
+    else:
+        w, g = perturb_memory(mem)
     m = len(w)
+    if model_kind == "exact":
+        h = E.sampled_impulse(mem, 512)
+    else:
+        h = sampled_impulse_custom(w, g, 512)
+    poles = np.exp(-g / SYMBOL_RATE)
     A = np.diag(poles.astype(complex))
-    D = h[0]
+    # For x[n+1]=A x[n]+B u[n], y[n]=C x[n]+D u[n],
+    # h_0=D and h_n=C A^(n-1) B. Hence h_1,...,h_m
+    # correspond to powers 0,...,m-1.
     V = np.vstack([poles**n for n in range(m)])
     B = np.linalg.solve(V, h[1 : m + 1])
     C = np.ones((1, m), dtype=complex)
+    D = h[0]
     hh = np.empty(512, dtype=complex)
     hh[0] = D
     state = B.copy()
@@ -242,7 +248,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
             evm_pct = float("inf")
             bit_error = 1.0
             mse = float("inf")
-            noise_gain = float("inf")
+            regularization_displacement = float("inf")
 
         params, macs = complexity(method, len(SOE_MEMORIES[mem][0]), len(y_unknown))
         rows.append(
@@ -269,7 +275,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
                 macs_per_sample=macs,
                 estimated_channel_norm=float(np.linalg.norm(h_est)),
                 true_channel_norm=float(np.linalg.norm(true_channel)),
-                noise_gain_proxy=noise_gain,
+                regularization_displacement=regularization_displacement,
                 retained_singular_values=aux if aux is not None else "",
                 finite=finite,
             )
@@ -288,7 +294,19 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
     return rows
 
 
+def validate_exact_realization():
+    errors = {}
+    for mem in SOE_MEMORIES:
+        physical = E.sampled_impulse(mem, 128)
+        state = state_impulse(mem, "exact")[:128]
+        err = float(np.max(np.abs(physical - state)))
+        errors[mem] = err
+        if err > 1e-10:
+            raise RuntimeError(f"SOE realization validation failed for {mem}: max error={err:.6e}")
+    print("12D exact SOE realization validation:", json.dumps(errors))
+
 def main():
+    validate_exact_realization()
     rows = []
     for seed in SEEDS:
         for signal_name, gen in SIGNALS.items():
