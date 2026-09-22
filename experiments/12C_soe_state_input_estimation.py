@@ -156,6 +156,14 @@ def main():
     p=out/"12C_soe_state_input_estimation_results.csv"
     with p.open("w",newline="") as f:
       w=csv.DictWriter(f,fieldnames=rows[0]); w.writeheader(); w.writerows(rows)
+    agg={}
+    for row in rows:
+        if float(row["snr_db"])==30.0:
+            key=(row["memory"],row["receiver"])
+            agg.setdefault(key,[]).append((float(row["evm_percent"]),float(row["ber"])))
+    print("30 dB aggregate:")
+    for (mem,rec),vals in sorted(agg.items()):
+        print(mem,rec,"mean_evm_percent=",float(np.mean([v[0] for v in vals])),"mean_ber=",float(np.mean([v[1] for v in vals])))
     summary={"experiment":"12C_SOE_state_input_estimation","rows":len(rows),"evaluation":"384 held-out symbols after 128-symbol training prefix",
              "receiver":"fixed-pole SOE state realization with causal triangular state/input inversion; channel taps estimated from training",
              "boundary":"12C uses a longer 256-symbol kernel horizon to reduce finite-memory truncation; this is a causal receiver"}
