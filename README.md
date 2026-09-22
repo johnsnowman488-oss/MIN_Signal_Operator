@@ -64,9 +64,9 @@ A positive result at each stage must therefore be demonstrated independently.
 
 Experiments 01–11 establish the numerical/operator foundation, kernel identification, signal atlas, spectral/finite-horizon behavior, digital-signal distortion, AWGN compensation, and controlled multipath/fading receiver behavior.
 
-The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Experiment 12C then tests explicit SOE state/input inversion: the matched noiseless state realization is accurate, but the direct causal inverse becomes poorly conditioned under noise and channel estimation. These experiments do not establish irreversibility, signal preservation, or a communication advantage.
+The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Experiment 12C then tests an explicit SOE state realization followed by direct, unregularized causal inversion: the matched noiseless realization is accurate, but the direct inverse becomes poorly conditioned under noise and channel estimation. This is a statement about a particular recovery path, not a verdict on MIN as a transformation. These experiments do not establish irreversibility, signal preservation, communication advantage, or propagation advantage.
 
-The immediate research target is therefore:
+The immediate receiver-side research target is therefore:
 
 [
 oxed{
@@ -82,7 +82,7 @@ The immediate research target is therefore:
 }
 ]
 
-with matched controls at every stage.
+with matched controls at every stage. In parallel, the project should keep open the transform-design question: whether appropriate kernels and SOE realizations can deliberately distribute signal structure over a useful temporal representation rather than treating every non-identity output as unwanted distortion.
 
 ### Baseline policy
 
