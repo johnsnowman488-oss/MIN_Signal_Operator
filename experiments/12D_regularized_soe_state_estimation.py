@@ -151,21 +151,19 @@ def solve_direct(H, y):
         return np.linalg.lstsq(H, y, rcond=None)[0]
 
 
-def solve_ridge(H, y, factor):
-    s = np.linalg.svd(H, compute_uv=False)
-    scale = max(float(s[0] ** 2), np.finfo(float).tiny)
+def solve_ridge_from_svd(H, y, factor, smax):
+    scale = max(float(smax ** 2), np.finfo(float).tiny)
     lam = factor * scale
     A = H.conj().T @ H + lam * np.eye(H.shape[1])
     b = H.conj().T @ y
     return np.linalg.solve(A, b), lam
 
 
-def solve_tsvd(H, y, relative_cutoff):
-    U, s, Vh = np.linalg.svd(H, full_matrices=False)
+def solve_tsvd_from_svd(U, s, Vh, y, relative_cutoff):
     cutoff = relative_cutoff * s[0]
     keep = s > cutoff
     if not np.any(keep):
-        return np.zeros(H.shape[1], dtype=complex), 0
+        return np.zeros(Vh.shape[1], dtype=complex), 0
     z = Vh[keep].conj().T @ ((U[:, keep].conj().T @ y) / s[keep])
     return z, int(np.count_nonzero(keep))
 
@@ -220,7 +218,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
     y_unknown = y_test - subtract_known_prefix(tx_train, h_model_total, n_test)
     H = conv_matrix(h_model_total, n_test)
 
-    s = np.linalg.svd(H, compute_uv=False)
+    U, s, Vh = np.linalg.svd(H, full_matrices=False)
     smax = float(s[0])
     smin = float(s[-1])
     cond = float(smax / smin) if smin > 0 else float("inf")
@@ -281,11 +279,11 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
     emit("direct", "none", solve_direct(H, y_unknown))
 
     for factor in RIDGE_FACTORS:
-        z, lam = solve_ridge(H, y_unknown, factor)
+        z, lam = solve_ridge_from_svd(H, y_unknown, factor, smax)
         emit("ridge", f"{factor:g}", z, f"lambda={lam:.6e}")
 
     for cutoff in TSVD_RELATIVE_CUTOFFS:
-        z, retained = solve_tsvd(H, y_unknown, cutoff)
+        z, retained = solve_tsvd_from_svd(U, s, Vh, y_unknown, cutoff)
         emit("tsvd", f"{cutoff:g}", z, retained)
 
     return rows
