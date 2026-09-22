@@ -110,7 +110,7 @@ def state_impulse(mem, model_kind):
     m = len(w)
     A = np.diag(poles.astype(complex))
     D = h[0]
-    V = np.vstack([poles**n for n in range(1, m + 1)])
+    V = np.vstack([poles**n for n in range(m)])
     B = np.linalg.solve(V, h[1 : m + 1])
     C = np.ones((1, m), dtype=complex)
     hh = np.empty(512, dtype=complex)
@@ -168,12 +168,11 @@ def solve_tsvd_from_svd(U, s, Vh, y, relative_cutoff):
     return z, int(np.count_nonzero(keep))
 
 
-def complexity(method, state_dim):
+def complexity(method, state_dim, n):
+    # State dimension is separate from batch estimator cost.
     if method == "direct":
-        return state_dim, 2 * state_dim + 1
-    if method == "ridge":
-        return state_dim, 2 * state_dim + 1
-    return state_dim, 2 * state_dim + 1
+        return state_dim, float(n * n)
+    return state_dim, float(2 * n * n * n)
 
 
 def run_case(signal_name, gen, mem, ch, seed, snr, case):
@@ -235,7 +234,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
             evm_pct = 100.0 * evm(tx[TRAIN_SYMBOLS:], z)
             bit_error = ber(signal_name, tx[TRAIN_SYMBOLS:], z)
             mse = float(np.mean(np.abs(z - tx[TRAIN_SYMBOLS:]) ** 2))
-            noise_gain = float(
+            regularization_displacement = float(
                 np.linalg.norm(z - np.linalg.lstsq(H, y_unknown, rcond=None)[0])
                 / max(np.linalg.norm(y_unknown), np.finfo(float).tiny)
             )
@@ -245,7 +244,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
             mse = float("inf")
             noise_gain = float("inf")
 
-        params, macs = complexity(method, len(SOE_MEMORIES[mem][0]))
+        params, macs = complexity(method, len(SOE_MEMORIES[mem][0]), len(y_unknown))
         rows.append(
             dict(
                 experiment="12D_regularized_SOE_state_estimation",
@@ -322,7 +321,7 @@ def main():
             "singular spectrum",
             "minimum singular value",
             "condition number",
-            "noise amplification proxy",
+            "regularization displacement from unregularized least-squares solution",
             "EVM",
             "BER",
             "held-out MSE",
