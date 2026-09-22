@@ -247,21 +247,19 @@ def design_soe_structured_equalizer(
     _, feedback, inverse_zero_radius = design_soe_inverse_equalizer(
         weights, gammas, sample_interval, ridge=ridge
     )
-    if feedback.size == 0:
-        X = np.column_stack([received[-(received.size-k):] if k else received
-                             for k in range(numerator_order)])
-        X = np.column_stack([
-            np.pad(received[:received.size-k], (k, 0))[:received.size]
-            for k in range(numerator_order)
-        ])
-    else:
-        basis = []
-        for k in range(numerator_order):
-            shifted = np.zeros(received.size, dtype=complex)
-            if k < received.size:
-                shifted[k:] = received[:received.size-k]
-            basis.append(apply_iir_equalizer(shifted, np.array([1.0 + 0j]), feedback))
-        X = np.column_stack(basis)
+    basis = []
+    for k in range(numerator_order):
+        shifted = np.zeros(received.size, dtype=complex)
+        if k < received.size:
+            shifted[k:] = received[:received.size-k]
+        if feedback.size:
+            response = apply_iir_equalizer(
+                shifted, np.array([1.0 + 0j]), feedback
+            )
+        else:
+            response = shifted
+        basis.append(response)
+    X = np.column_stack(basis)
 
     gram = X.conj().T @ X + ridge * np.eye(numerator_order)
     coeff = np.linalg.solve(gram, X.conj().T @ desired)
