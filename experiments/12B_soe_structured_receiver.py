@@ -105,8 +105,11 @@ def _soe_inverse_feedback(memory):
         1.0 / np.conj(root) if abs(root) > 1.0 else root for root in roots
     ])
     if stable_roots.size:
-        stable_denominator = np.poly(stable_roots)[::-1]
-        stable_denominator = stable_denominator / stable_denominator[0]
+        stable_denominator = np.array([1.0], dtype=complex)
+        for root in stable_roots:
+            stable_denominator = np.polynomial.polynomial.polymul(
+                stable_denominator, [1.0, -root]
+            )
         stable_feedback = -stable_denominator[1:]
     else:
         stable_feedback = np.array([], dtype=complex)
