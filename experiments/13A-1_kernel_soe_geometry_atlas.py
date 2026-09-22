@@ -126,7 +126,7 @@ def impulse_metrics(gammas: np.ndarray, weights: np.ndarray, dt: float) -> dict:
     h_fft = np.zeros(n_fft, dtype=complex)
     h_fft[: min(h.size, n_fft)] = h[:n_fft]
     freq = np.fft.rfftfreq(n_fft, d=dt)
-    response = np.fft.rfft(h_fft)
+    response = np.fft.fft(h_fft)[: n_fft // 2 + 1]
     mag = np.abs(response)
 
     return {
