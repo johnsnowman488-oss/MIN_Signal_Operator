@@ -123,10 +123,15 @@ def spectrum_metrics(eig: np.ndarray, prefix: str) -> dict:
     }
 
 
-def basis_geometry(gammas: np.ndarray) -> dict:
+def basis_geometry(gammas: np.ndarray, weights: np.ndarray) -> dict:
     g = gammas[:, None] + gammas[None, :]
     gram = -np.expm1(-g * HORIZON_S) / g
     out = spectrum_metrics(np.linalg.eigvalsh(gram), "basis")
+    # The unweighted dictionary geometry is a control. The environment enters
+    # the realized kernel geometry through its fitted positive weights, so a
+    # weighted Gram geometry is the environment-dependent basis descriptor.
+    wgram = np.sqrt(weights)[:, None] * gram * np.sqrt(weights)[None, :]
+    out.update(spectrum_metrics(np.linalg.eigvalsh(wgram), "weighted_basis")
     diag = np.sqrt(np.maximum(np.diag(gram), 0.0))
     corr = gram / np.outer(np.maximum(diag, np.finfo(float).tiny),
                            np.maximum(diag, np.finfo(float).tiny))
@@ -228,10 +233,10 @@ def run_case(signal_name, generator, environment_name, seed):
     row.update(environment_metrics(fit_t, target))
     row.update(fit_metrics(fit_t, target, fitted))
     row.update(gfe_metrics(gammas, weights))
-    row.update(basis_geometry(gammas))
+    row.update(basis_geometry(gammas, weights))
     row.update(state_geometry(q, weights))
-    row["basis_to_state_entropy_ratio"] = (
-        row["state_entropy_dimension"] / row["basis_entropy_dimension"]
+    row["weighted_basis_to_state_entropy_ratio"] = (
+        row["state_entropy_dimension"] / row["weighted_basis_entropy_dimension"]
         if row["basis_entropy_dimension"] > 0 else float("nan")
     )
     return row
@@ -244,7 +249,8 @@ def mean_summary(rows):
         "kernel_fit_relative_l2", "kernel_fit_r2", "gfe_m_scale_decades",
         "gfe_m_res_modes_per_decade", "gfe_h_mem_nats", "gfe_entropy_effective_count",
         "gfe_d_eff", "basis_participation_dimension", "basis_entropy_dimension",
-        "basis_max_coherence", "state_participation_dimension",
+        "basis_max_coherence", "weighted_basis_participation_dimension",
+        "weighted_basis_entropy_dimension", "state_participation_dimension",
         "state_entropy_dimension", "state_max_component_collinearity",
         "weighted_state_participation_dimension", "basis_to_state_entropy_ratio",
     ]
