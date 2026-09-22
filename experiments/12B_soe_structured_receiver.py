@@ -77,7 +77,7 @@ def _ber(signal_name, tx, estimate):
 def _memory_filter(x, name):
     weights, gammas = SOE_MEMORIES[name]
     count = 32
-    lags = np.arange(count * SPS) * DT
+    lags = np.arange(count * SPS) * SAMPLE_DT
     k = sum(w * np.exp(-g * lags) for w, g in zip(weights, gammas))
     k /= np.sum(k)
     return np.convolve(x, k, mode="full")[:x.size]
