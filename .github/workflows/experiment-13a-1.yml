@@ -1,0 +1,29 @@
+name: experiment-13a-1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "experiments/13A-1_kernel_soe_geometry_atlas.py"
+      - ".github/workflows/experiment-13a-1.yml"
+      - "docs/experiments/13A-1_Kernel_SOE_Geometry_Atlas.md"
+
+jobs:
+  run-13a-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[test,research]"
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Run Experiment 13A-1
+        run: python experiments/13A-1_kernel_soe_geometry_atlas.py
+      - name: Upload 13A-1 results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-13a-1-results
+          path: experiments/results/13A-1_*
