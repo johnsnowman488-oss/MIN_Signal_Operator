@@ -219,6 +219,37 @@ def _apply_fixed_denominator_basis(received: np.ndarray, denominator_feedback: n
     return responses
 
 
+def design_fixed_denominator_equalizer(
+    received: np.ndarray,
+    desired: np.ndarray,
+    feedback: np.ndarray,
+    numerator_order: int,
+    ridge: float = 1e-6,
+):
+    """Fit a feedforward numerator while keeping an IIR denominator fixed."""
+    received = np.asarray(received)
+    desired = np.asarray(desired)
+    feedback = np.asarray(feedback, dtype=complex)
+    if received.ndim != 1 or desired.ndim != 1 or received.size != desired.size:
+        raise ValueError("received and desired must be 1D arrays of equal length")
+    if numerator_order < 1 or received.size < numerator_order + 4:
+        raise ValueError("invalid numerator order or training length")
+    if ridge < 0:
+        raise ValueError("ridge must be nonnegative")
+
+    basis = []
+    for k in range(numerator_order):
+        shifted = np.zeros(received.size, dtype=complex)
+        shifted[k:] = received[:received.size-k]
+        if feedback.size:
+            shifted = apply_iir_equalizer(shifted, np.array([1.0 + 0j]), feedback)
+        basis.append(shifted)
+    X = np.column_stack(basis)
+    gram = X.conj().T @ X + ridge * np.eye(numerator_order)
+    coeff = np.linalg.solve(gram, X.conj().T @ desired)
+    return coeff
+
+
 def design_soe_structured_equalizer(
     received: np.ndarray,
     desired: np.ndarray,
