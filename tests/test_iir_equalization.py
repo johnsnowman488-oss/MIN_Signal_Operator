@@ -15,7 +15,9 @@ def test_iir_round_trip_on_synthetic_stable_recursion():
         received[:192], desired[:192],
         feedforward=2, feedback=2, ridge=1e-10, pole_radius_limit=0.98,
     )
-    estimate = apply_iir_equalizer(received[192:], b, a)
+    # Preserve recursive state across the train/test boundary by applying the
+    # fitted receiver to the complete stream before evaluating the held-out tail.
+    estimate = apply_iir_equalizer(received, b, a)[192:]
 
     assert radius < 0.98 + 1e-10
     assert np.mean(np.abs(estimate - desired[192:]) ** 2) < 1e-5
