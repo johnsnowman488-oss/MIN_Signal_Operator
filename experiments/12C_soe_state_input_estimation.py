@@ -107,8 +107,9 @@ def state_receiver(tx_train,obs_train,obs_test,mem,h_est,ridge=1e-3):
     prefix=np.asarray(tx_train)
     known=np.zeros(len(obs_test),dtype=complex)
     for i,idx in enumerate(np.arange(len(prefix),len(prefix)+len(obs_test))):
-        k=min(idx,len(combined)-1,len(prefix))
-        known[i]=np.dot(combined[1:k+1],prefix[idx-1::-1][:k]) if k else 0.0
+        k=len(prefix)
+        lo=idx-k+1
+        known[i]=np.dot(combined[lo:idx+1],prefix[::-1])
     innovation=obs_test-known
     H=conv_matrix(combined,len(obs_test))
     return ridge_solve(H,innovation,ridge)
