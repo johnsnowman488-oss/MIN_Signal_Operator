@@ -70,10 +70,8 @@ sample interval with piecewise-constant input:
 
 \[
 q_j[n]
-=
-e^{-\gamma_j\Delta t}q_j[n-1]
-+
-\frac{1-e^{-\gamma_j\Delta t}}{\gamma_j}x[n].
+=e^{-\gamma_j\Delta t}q_j[n-1]
++\frac{1-e^{-\gamma_j\Delta t}}{\gamma_j}x[n].
 \]
 
 This is a state realization of the continuous exponential convolution, not
@@ -127,6 +125,80 @@ For the aggregate causal impulse response, record:
 The scalar MIN output is separately characterized by energy, RMS trajectory
 length, and its scalar effective dimension.
 
+## GFE/GGFE spectral-memory metrics
+
+The atlas result is now **enriched after simulation** with the GFE/GGFE
+spectral-memory quantities. This is a post-processing layer: the 675
+forward simulations are not rerun for these metrics. They are derived
+deterministically from the recorded SOE weights and decay rates \((a_j,\gamma_j)\).
+
+For the positive SOE
+
+\[
+K(t)=\sum_{j=1}^{L}w_j e^{-\gamma_j t},
+\qquad
+\widetilde w_j=\frac{w_j}{\sum_k w_k},
+\]
+
+the project records:
+
+\[
+M_{cap}=\frac{\sum_j w_j/\gamma_j^2}
+               {\sum_j w_j/\gamma_j},
+\]
+
+\[
+M_{scale}=\log_{10}\left(\frac{\gamma_{max}}{\gamma_{min}}\right),
+\qquad
+M_{res}=\frac{L}{M_{scale}},
+\]
+
+\[
+H_{mem}=-\sum_j \widetilde w_j\ln\widetilde w_j,
+\]
+
+and the documented GGFE/Spectral Memory Units effective dimension
+
+\[
+D_{eff}=L\exp(H_{mem}).
+\]
+
+The derived quantity
+
+\[
+D_{entropy}=\exp(H_{mem})
+\]
+
+is also retained separately. This prevents the entropy contribution from
+being conflated with the explicit SOE mode count \(L\).
+
+These kernel-level quantities are intentionally kept separate from the
+empirical state-space quantities. In particular,
+
+\[
+D_{eff}\neq D_{state}
+\]
+
+in general. The atlas is intended to test whether spectral kernel geometry
+helps explain the realized temporal-state geometry.
+
+### Interpretation of the GFE metrics
+
+- **Mcap** characterizes weighted temporal depth.
+- **Mscale** characterizes the logarithmic span of decay rates/timescales.
+- **Mres** describes nominal mode density across that span.
+- **Hmem** describes the distribution of normalized spectral weight.
+- **D_eff** is the documented GGFE composite measure.
+- **D_entropy** isolates the entropy-derived effective component count.
+
+\(M_{res}\) is treated as a secondary descriptor because closely clustered
+rates can produce high nominal mode density while simultaneously producing
+highly redundant state coordinates.
+
+No \(d_s\) is assigned in 13A-1. Spectral/fractal dimension is reserved for
+later experiments involving non-Weyl, continuous, or explicitly
+power-law/fractal spectral structures.
+
 ## Interpretation rules
 
 A larger effective dimension is **not** automatically better.
@@ -138,6 +210,9 @@ A longer memory time is **not** automatically more useful.
 The purpose of the atlas is to determine whether kernel geometry produces
 systematic, reproducible changes in the temporal representation that can later
 be connected to a task.
+
+The GFE/GGFE metrics are therefore explanatory descriptors, not optimization
+targets by themselves.
 
 The experiment therefore does **not** claim:
 
@@ -153,14 +228,30 @@ Those require later experiments.
 
 ## Expected next connection
 
-13A-1 supplies the representation side of
+13A-1 supplies both sides of the representation comparison:
 
 \[
-(K,x)\rightarrow q_K(t).
+\underbrace{(w_j,\gamma_j)}_{\text{spectral kernel geometry}}
+\rightarrow
+\underbrace{q_K(t)}_{\text{MIN temporal representation}}.
 \]
 
-The next experiment can then test whether regions of this kernel geometry
-space have different utility for an explicitly defined task:
+The GFE/GGFE quantities provide kernel-level descriptors, while the MIN atlas
+metrics provide empirical state-level descriptors.
+
+The next analysis should therefore test relationships such as
+
+\[
+D_{eff}\leftrightarrow D_{state},
+\quad
+M_{scale}\leftrightarrow\text{state collinearity},
+\quad
+H_{mem}\leftrightarrow D_{state},
+\quad
+M_{cap}\leftrightarrow\text{temporal spread}.
+\]
+
+Only after that comparison should a task layer be introduced:
 
 \[
 (K,\mathcal T)\rightarrow U.
@@ -168,7 +259,6 @@ space have different utility for an explicitly defined task:
 
 That task layer should be introduced only after this atlas is numerically
 validated.
-
 
 ## Executed result
 
@@ -179,6 +269,9 @@ The corrected CI run completed successfully:
 - result rows: 675;
 - artifact: experiment-13a-1-results;
 - artifact SHA-256: 5cc14e33865962b75086df8c7967d77e9cc298286736f150643891917dae3897.
+
+The GFE/GGFE enrichment is implemented as a separate deterministic
+post-processing step and does not alter the audited 13A-1 simulation.
 
 ### First observations
 

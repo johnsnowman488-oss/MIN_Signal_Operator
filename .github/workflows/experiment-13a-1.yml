@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "experiments/13A-1_kernel_soe_geometry_atlas.py"
+      - "experiments/13A-1_gfe_enrichment.py"
       - ".github/workflows/experiment-13a-1.yml"
       - "docs/experiments/13A-1_Kernel_SOE_Geometry_Atlas.md"
 
@@ -22,8 +23,11 @@ jobs:
         run: python -m pytest -q
       - name: Run Experiment 13A-1
         run: python experiments/13A-1_kernel_soe_geometry_atlas.py
+      - name: Enrich 13A-1 results with GFE/GGFE metrics
+        run: python experiments/13A-1_gfe_enrichment.py
       - name: Upload 13A-1 results
         uses: actions/upload-artifact@v4
         with:
-          name: experiment-13a-1-results
-          path: experiments/results/13A-1_*
+          name: experiment-13a-1-results-gfe
+          path: |
+            experiments/results/13A-1_*
