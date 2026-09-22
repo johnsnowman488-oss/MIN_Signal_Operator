@@ -1,0 +1,24 @@
+name: experiment-12b
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-12b:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[test,notebook]"
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Run Experiment 12B
+        run: python experiments/12B_soe_structured_receiver.py
+      - name: Upload 12B results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-12b-results
+          path: experiments/results/12B_*
