@@ -1,18 +1,16 @@
 """Post-process 13A-1 results with GFE/GGFE spectral-memory metrics.
 
-This does not rerun the 13A-1 simulation. It derives kernel-level metrics
-directly from the recorded SOE parameters (weights and decay rates), then
-joins them to the existing 675-row atlas.
+The 13A-1 simulation is not rerun for this layer. Metrics are derived from
+the recorded SOE weights and decay rates and joined to the audited 675 rows.
 
 Definitions follow the GGFE/Spectral Memory Units formulation:
 M_cap = (sum w/gamma^2) / (sum w/gamma)
 M_scale = log10(gamma_max/gamma_min)
-M_res = L/M_scale
+M_res = L/M_scale (undefined when M_scale == 0)
 H_mem = -sum w_tilde log(w_tilde)
 D_eff = L*exp(H_mem)
 
-The entropy-effective component count exp(H_mem) is also retained separately
-to distinguish weight-distribution complexity from the documented D_eff.
+exp(H_mem) is retained separately from the documented D_eff.
 """
 
 from __future__ import annotations
@@ -33,13 +31,7 @@ SUMMARY = RESULTS / "13A-1_kernel_soe_geometry_atlas_gfe_summary.json"
 
 def spectral_metrics(row: dict) -> dict:
     L = int(row["mode_count"])
-    gamma_min = float(row["gamma_min"])
-    gamma_max = float(row["gamma_max"])
-    w_min = float(row["weight_min"])
-    w_max = float(row["weight_max"])
 
-    # The atlas records only min/max weights, not the complete vector. Recover
-    # the exact deterministic weight vector from the named pattern.
     if L == 1:
         weights = np.ones(1, dtype=float)
     elif row["weight_pattern"] == "uniform":
@@ -48,7 +40,6 @@ def spectral_metrics(row: dict) -> dict:
         weights = np.full(L, 0.3 / (L - 1), dtype=float)
         weights[0 if row["weight_pattern"] == "slow_dominant" else -1] = 0.7
 
-    # Recover the exact deterministic gamma grid from the atlas condition.
     geometry = row["rate_geometry"]
     if geometry == "clustered":
         gammas = 10.0 * np.exp(np.linspace(-0.05, 0.05, L))
@@ -65,7 +56,7 @@ def spectral_metrics(row: dict) -> dict:
     wt = weights / np.sum(weights)
     m_cap = float(np.sum(weights / gammas**2) / np.sum(weights / gammas))
     m_scale = float(math.log10(np.max(gammas) / np.min(gammas)))
-    m_res = float(L / m_scale) if m_scale > 0 else float("inf")
+    m_res = float(L / m_scale) if m_scale > 0 else float("nan")
     h_mem = float(-np.sum(wt * np.log(wt)))
     entropy_effective_count = float(np.exp(h_mem))
     d_eff = float(L * entropy_effective_count)
@@ -80,32 +71,47 @@ def spectral_metrics(row: dict) -> dict:
     }
 
 
+def pairwise_corr(rows: list[dict], left: str, right: str) -> float:
+    x, y = [], []
+    for row in rows:
+        a, b = float(row[left]), float(row[right])
+        if math.isfinite(a) and math.isfinite(b):
+            x.append(a)
+            y.append(b)
+    if len(x) < 2 or np.std(x) == 0 or np.std(y) == 0:
+        return float("nan")
+    return float(np.corrcoef(np.asarray(x), np.asarray(y))[0, 1])
+
+
 def main() -> None:
     with INPUT.open(newline="") as f:
         rows = list(csv.DictReader(f))
 
     if len(rows) != 675:
-        raise ValueError(f"Expected the audited 13A-1 atlas to contain 675 rows; got {len(rows)}.")
+        raise ValueError(
+            f"Expected the audited 13A-1 atlas to contain 675 rows; got {len(rows)}."
+        )
 
     enriched = []
-    for row in rows:
-        row = dict(row)
+    for original in rows:
+        row = dict(original)
         row.update(spectral_metrics(row))
         enriched.append(row)
 
-    fields = list(enriched[0])
     with OUTPUT.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=list(enriched[0]))
         writer.writeheader()
         writer.writerows(enriched)
 
-    names = [
+    gfe_names = [
         "gfe_m_cap_s",
         "gfe_m_scale_decades",
         "gfe_m_res_modes_per_decade",
         "gfe_h_mem_nats",
         "gfe_entropy_effective_count",
         "gfe_d_eff",
+    ]
+    state_names = [
         "state_participation_dimension",
         "state_weighted_participation_dimension",
         "state_max_component_collinearity",
@@ -113,14 +119,10 @@ def main() -> None:
         "kernel_centroid_s",
     ]
 
-    matrix = np.array([[float(r[n]) for n in names] for r in enriched], dtype=float)
-    corr = np.corrcoef(matrix, rowvar=False)
-    correlations = {}
-    for i, name in enumerate(names[:6]):
-        correlations[name] = {
-            other: float(corr[i, j])
-            for j, other in enumerate(names[6:], start=6)
-        }
+    correlations = {
+        g: {s: pairwise_corr(enriched, g, s) for s in state_names}
+        for g in gfe_names
+    }
 
     summary = {
         "experiment": "13A-1_kernel_soe_geometry_atlas",
@@ -132,21 +134,21 @@ def main() -> None:
         "definitions": {
             "M_cap": "sum(w/gamma^2) / sum(w/gamma)",
             "M_scale": "log10(gamma_max/gamma_min)",
-            "M_res": "L/M_scale",
+            "M_res": "L/M_scale; undefined for zero spectral span",
             "H_mem": "-sum(w_tilde*ln(w_tilde))",
             "entropy_effective_count": "exp(H_mem)",
             "D_eff": "L*exp(H_mem), following GGFE/Spectral Memory Units",
         },
         "interpretation": [
-            "These metrics characterize the SOE kernel, not the empirical state trajectory.",
-            "D_eff is retained as the documented GGFE quantity; exp(H_mem) is retained separately.",
-            "M_res is secondary because clustered rates can be spectrally dense yet highly redundant.",
-            "No d_s is assigned to this finite positive SOE atlas; spectral/fractal dimension belongs to later non-Weyl or continuous-spectrum experiments.",
+            "Metrics characterize the SOE kernel, not the empirical state trajectory.",
+            "D_eff is the documented GGFE quantity; exp(H_mem) is retained separately.",
+            "M_res is secondary because clustered rates can be dense yet highly redundant.",
+            "No d_s is assigned to this finite positive SOE atlas; reserve spectral/fractal dimension for later non-Weyl or continuous-spectrum experiments.",
         ],
         "kernel_to_state_correlations_pearson": correlations,
     }
 
-    SUMMARY.write_text(json.dumps(summary, indent=2) + "\n")
+    SUMMARY.write_text(json.dumps(summary, indent=2, allow_nan=True) + "\n")
 
 
 if __name__ == "__main__":
