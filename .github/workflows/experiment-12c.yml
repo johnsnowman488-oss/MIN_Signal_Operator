@@ -1,0 +1,24 @@
+name: experiment-12c
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-12c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[test,notebook]"
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Run Experiment 12C
+        run: python experiments/12C_soe_state_input_estimation.py
+      - name: Upload 12C results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-12c-results
+          path: experiments/results/12C_*
