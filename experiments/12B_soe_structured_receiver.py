@@ -41,7 +41,7 @@ TRAIN_SYMBOLS = 128
 SPS = 16
 SYMBOL_RATE = 100.0
 SEEDS = tuple(range(5))
-DT = 1.0 / (SYMBOL_RATE * SPS)
+DT = 1.0 / SYMBOL_RATE
 
 
 def _bits(signal_name, symbols):
