@@ -184,7 +184,7 @@ def _run_case(signal_name, generator, memory, channel, seed, snr_db):
                 np.r_[1.0, -feedback]
             )))) if feedback.size else 0.0
 
-        params, states, macs = _complexity(receiver, memory)
+        params, states, macs, trainable = _complexity(receiver, memory)
         rows.append({
             "experiment": "12B_SOE_structured_receiver",
             "signal": signal_name,
@@ -198,6 +198,7 @@ def _run_case(signal_name, generator, memory, channel, seed, snr_db):
             "ber": _ber(signal_name, tx[test], estimate),
             "heldout_mse": float(np.mean(abs(estimate - tx[test]) ** 2)),
             "parameter_count": params,
+            "trainable_parameter_count": trainable,
             "state_dimension": states,
             "macs_per_sample": macs,
             "effective_memory_samples": states,
