@@ -246,7 +246,7 @@ def design_fixed_denominator_equalizer(
         basis.append(shifted)
     X = np.column_stack(basis)
     gram = X.conj().T @ X + ridge * np.eye(numerator_order)
-    coeff = np.linalg.solve(gram, X.conj().T @ desired)
+    coeff = np.linalg.lstsq(gram, X.conj().T @ desired, rcond=None)[0]
     return coeff
 
 
