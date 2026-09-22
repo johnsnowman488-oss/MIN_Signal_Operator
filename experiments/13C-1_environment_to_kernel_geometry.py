@@ -252,7 +252,7 @@ def mean_summary(rows):
         "basis_max_coherence", "weighted_basis_participation_dimension",
         "weighted_basis_entropy_dimension", "state_participation_dimension",
         "state_entropy_dimension", "state_max_component_collinearity",
-        "weighted_state_participation_dimension", "basis_to_state_entropy_ratio",
+        "weighted_state_participation_dimension", "weighted_basis_to_state_entropy_ratio",
     ]
     for r in rows:
         groups.setdefault(r["environment"], []).append(r)
