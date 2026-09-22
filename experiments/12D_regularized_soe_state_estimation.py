@@ -142,6 +142,17 @@ def subtract_known_prefix(prefix, h_model, n_test):
     return out
 
 
+def exact_forward_impulse(mem, channel_name, true_channel, n):
+    """Actual symbol-rate impulse of the sample-rate forward pipeline."""
+    x = np.zeros(n * SPS, dtype=complex)
+    x[:SPS] = 1
+    y = E.memory_filter(x, mem)
+    if channel_name == "identity":
+        z = y
+    else:
+        z = np.convolve(y, true_channel)[: len(y)]
+    return z[np.arange(n) * SPS + SPS // 2]
+
 def channel_from_name(x, name, rng):
     return E.channel(x, name, rng)
 
@@ -216,8 +227,11 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
         taps = 1 if ch in ("identity", "flat_rayleigh") else 3
         h_est = channel_estimate(tx_train, y_train, mem, taps)
 
-    h_true = np.convolve(state_impulse(mem, "exact"), true_channel)
-    h_model_total = np.convolve(h_model, h_est)
+    h_true = exact_forward_impulse(mem, ch, true_channel, n_test)
+    if exact_channel:
+        h_model_total = h_true.copy()
+    else:
+        h_model_total = np.convolve(h_model, h_est)
 
     # The unknown held-out input is preceded by the known training sequence.
     y_unknown = y_test - subtract_known_prefix(tx_train, h_model_total, n_test)
@@ -233,6 +247,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
     true_cond = float(true_s[0] / true_s[-1]) if true_s[-1] > 0 else float("inf")
 
     rows = []
+    ls_solution = np.linalg.lstsq(H, y_unknown, rcond=None)[0]
 
     def emit(method, hyperparameter, z, aux=None):
         finite = bool(np.all(np.isfinite(z)))
@@ -241,7 +256,7 @@ def run_case(signal_name, gen, mem, ch, seed, snr, case):
             bit_error = ber(signal_name, tx[TRAIN_SYMBOLS:], z)
             mse = float(np.mean(np.abs(z - tx[TRAIN_SYMBOLS:]) ** 2))
             regularization_displacement = float(
-                np.linalg.norm(z - np.linalg.lstsq(H, y_unknown, rcond=None)[0])
+                np.linalg.norm(z - ls_solution)
                 / max(np.linalg.norm(y_unknown), np.finfo(float).tiny)
             )
         else:
