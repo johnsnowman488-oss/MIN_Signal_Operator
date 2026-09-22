@@ -140,8 +140,9 @@ def _complexity(receiver, memory):
         return 4, 2, 4
     weights, _ = SOE_MEMORIES[memory]
     m = len(weights)
-    # Numerator has m+1 taps; SOE-derived denominator has m-1 feedback states.
-    return m + 1 + max(m - 1, 0), max(m - 1, 0), 2 * m
+    # The sampled rectangular-pulse realization contributes m+1 learned
+    # numerator taps and m recursive states in the inverse denominator.
+    return 2 * m + 1, m, 2 * m + 1
 
 
 def _run_case(signal_name, generator, memory, channel, seed, snr_db):
