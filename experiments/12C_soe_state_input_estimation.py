@@ -12,6 +12,7 @@ import csv, json
 from pathlib import Path
 import sys
 import numpy as np
+from scipy.linalg import solve_triangular
 
 ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT))
 from min.metrics.equalization import add_awgn, design_fir_equalizer, apply_fir_equalizer, design_iir_equalizer, apply_iir_equalizer, evm
@@ -45,7 +46,7 @@ def decide(name,z):
 def ber(name,tx,z): return float(np.mean(bits(name,tx)!=bits(name,decide(name,z))))
 
 def memory_filter(x,mem):
-    w,g=SOE_MEMORIES[mem]; l=np.arange(32*SPS)*SAMPLE_DT
+    w,g=SOE_MEMORIES[mem]; l=np.arange(256*SPS)*SAMPLE_DT
     k=sum(a*np.exp(-b*l) for a,b in zip(w,g)); k/=k.sum()
     return np.convolve(x,k,mode="full")[:x.size]
 
@@ -101,7 +102,7 @@ def estimate_channel(tx,obs,mem,taps):
     d=obs[taps-1:]
     return np.linalg.lstsq(X,d,rcond=None)[0]
 
-def state_receiver(tx_train,obs_train,obs_test,mem,h_est,ridge=1e-3):
+def state_receiver(tx_train,obs_train,obs_test,mem,h_est):
     _,_,_,_,h=state_model(mem,512)
     combined=np.convolve(h,h_est)
     prefix=np.asarray(tx_train)
@@ -112,7 +113,7 @@ def state_receiver(tx_train,obs_train,obs_test,mem,h_est,ridge=1e-3):
         known[i]=np.dot(combined[lo:idx+1],prefix[::-1])
     innovation=obs_test-known
     H=conv_matrix(combined,len(obs_test))
-    return ridge_solve(H,innovation,ridge)
+    return solve_triangular(H,innovation,lower=True)
 
 def complexity(mem):
     m=len(SOE_MEMORIES[mem][0])
@@ -156,8 +157,8 @@ def main():
     with p.open("w",newline="") as f:
       w=csv.DictWriter(f,fieldnames=rows[0]); w.writeheader(); w.writerows(rows)
     summary={"experiment":"12C_SOE_state_input_estimation","rows":len(rows),"evaluation":"384 held-out symbols after 128-symbol training prefix",
-             "receiver":"fixed-pole SOE state realization with regularized batch state/input inversion; channel taps estimated from training",
-             "boundary":"offline smoother, not a causal online receiver"}
+             "receiver":"fixed-pole SOE state realization with causal triangular state/input inversion; channel taps estimated from training",
+             "boundary":"12C uses a longer 256-symbol kernel horizon to reduce finite-memory truncation; this is a causal receiver"}
     (out/"12C_soe_state_input_estimation_summary.json").write_text(json.dumps(summary,indent=2)+"\n")
     print(json.dumps(summary,indent=2))
 if __name__=="__main__": main()
