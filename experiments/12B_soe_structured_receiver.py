@@ -133,16 +133,17 @@ def _channel(x, name, rng):
 
 def _complexity(receiver, memory):
     if receiver == "raw":
-        return 0, 0, 0
+        return 0, 0, 0, 0
     if receiver == "fir7":
-        return 7, 6, 7
+        return 7, 6, 7, 7
     if receiver == "iir2":
-        return 4, 2, 4
+        return 4, 2, 4, 4
     weights, _ = SOE_MEMORIES[memory]
     m = len(weights)
     # The sampled rectangular-pulse realization contributes m+1 learned
-    # numerator taps and m recursive states in the inverse denominator.
-    return 2 * m + 1, m, 2 * m + 1
+    # numerator taps and m fixed recursive coefficients.
+    total = 2 * m + 1
+    return total, m, total, m + 1
 
 
 def _run_case(signal_name, generator, memory, channel, seed, snr_db):
