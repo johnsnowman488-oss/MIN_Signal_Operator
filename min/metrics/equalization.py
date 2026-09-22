@@ -159,3 +159,110 @@ def evm(reference: np.ndarray, estimate: np.ndarray) -> float:
     if denom <= 0:
         raise ValueError("reference must have nonzero power")
     return float(np.sqrt(np.mean(np.abs(estimate - reference) ** 2) / denom))
+
+
+
+def design_soe_inverse_equalizer(weights, gammas, sample_interval, ridge: float = 1e-6):
+    """Construct a causal inverse with denominator fixed by a known SOE kernel.
+
+    For sampled poles r_j=exp(-gamma_j*T), the normalized SOE transfer function is
+        H(z) = N(z) / (G D(z)),
+    where D(z)=prod_j(1-r_j z^-1) and
+    N(z)=sum_j c_j prod_{k!=j}(1-r_k z^-1).
+    The receiver fits only the numerator of G*D/N to training data, while the
+    denominator is fixed by the supplied SOE structure.
+
+    This is a structure-aware baseline, not an optimal inverse or a proof of
+    stable invertibility.
+    """
+    weights = np.asarray(weights, dtype=float)
+    gammas = np.asarray(gammas, dtype=float)
+    if weights.ndim != 1 or gammas.ndim != 1 or weights.size != gammas.size or weights.size == 0:
+        raise ValueError("weights and gammas must be equal nonempty 1D arrays")
+    if np.any(gammas <= 0) or sample_interval <= 0:
+        raise ValueError("gammas and sample_interval must be positive")
+    if ridge < 0:
+        raise ValueError("ridge must be nonnegative")
+
+    poles = np.exp(-gammas * sample_interval)
+    denominator = np.array([1.0], dtype=complex)
+    for pole in poles:
+        denominator = np.polynomial.polynomial.polymul(denominator, [1.0, -pole])
+
+    numerator = np.zeros(weights.size, dtype=complex)
+    for j, weight in enumerate(weights):
+        term = np.array([1.0], dtype=complex)
+        for k, pole in enumerate(poles):
+            if k != j:
+                term = np.polynomial.polynomial.polymul(term, [1.0, -pole])
+        numerator[:term.size] += weight * term
+
+    dc_gain = float(np.sum(weights / (1.0 - poles)))
+    fixed_feedback = -numerator[1:] / numerator[0]
+    basis_numerator = dc_gain * denominator / numerator[0]
+    return basis_numerator, fixed_feedback, float(np.max(np.abs(np.roots(numerator[::-1])))) if numerator.size > 1 else 0.0
+
+
+def _apply_fixed_denominator_basis(received: np.ndarray, denominator_feedback: np.ndarray,
+                                   numerator_order: int) -> np.ndarray:
+    """Return responses of a fixed recursive denominator to each numerator tap."""
+    received = np.asarray(received)
+    feedback = np.asarray(denominator_feedback)
+    responses = np.zeros((received.size, numerator_order), dtype=complex)
+    for k in range(numerator_order):
+        impulse_input = np.zeros(received.size, dtype=complex)
+        if k < received.size:
+            impulse_input[k] = 1.0
+        responses[:, k] = apply_iir_equalizer(
+            impulse_input, np.array([1.0 + 0j]), feedback
+        )
+    return responses
+
+
+def design_soe_structured_equalizer(
+    received: np.ndarray,
+    desired: np.ndarray,
+    weights,
+    gammas,
+    sample_interval: float,
+    numerator_order: int | None = None,
+    ridge: float = 1e-6,
+):
+    """Fit only the numerator of an SOE-derived inverse denominator.
+
+    The recursive denominator is fixed by the known SOE weights/gammas; only
+    feedforward coefficients are learned from the training sequence.
+    """
+    received = np.asarray(received)
+    desired = np.asarray(desired)
+    if received.ndim != 1 or desired.ndim != 1 or received.size != desired.size:
+        raise ValueError("received and desired must be 1D arrays of equal length")
+    if received.size < 8:
+        raise ValueError("training sequence is too short")
+    if numerator_order is None:
+        numerator_order = len(np.asarray(gammas)) + 1
+    if numerator_order < 1:
+        raise ValueError("numerator_order must be positive")
+
+    _, feedback, inverse_zero_radius = design_soe_inverse_equalizer(
+        weights, gammas, sample_interval, ridge=ridge
+    )
+    if feedback.size == 0:
+        X = np.column_stack([received[-(received.size-k):] if k else received
+                             for k in range(numerator_order)])
+        X = np.column_stack([
+            np.pad(received[:received.size-k], (k, 0))[:received.size]
+            for k in range(numerator_order)
+        ])
+    else:
+        basis = []
+        for k in range(numerator_order):
+            shifted = np.zeros(received.size, dtype=complex)
+            if k < received.size:
+                shifted[k:] = received[:received.size-k]
+            basis.append(apply_iir_equalizer(shifted, np.array([1.0 + 0j]), feedback))
+        X = np.column_stack(basis)
+
+    gram = X.conj().T @ X + ridge * np.eye(numerator_order)
+    coeff = np.linalg.solve(gram, X.conj().T @ desired)
+    return coeff, feedback, inverse_zero_radius
