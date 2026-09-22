@@ -168,3 +168,65 @@ space have different utility for an explicitly defined task:
 
 That task layer should be introduced only after this atlas is numerically
 validated.
+
+
+## Executed result
+
+The corrected CI run completed successfully:
+
+- workflow run: 35789711896;
+- commit: c9405ac6ac7abfe8b8c94ce0a8ee568f4503d37f;
+- result rows: 675;
+- artifact: experiment-13a-1-results;
+- artifact SHA-256: 5cc14e33865962b75086df8c7967d77e9cc298286736f150643891917dae3897.
+
+### First observations
+
+For the logspread/uniform family, mean participation dimension across the
+three signal families and five seeds was approximately:
+
+| Modes | Participation dimension | 99% rank | Maximum component collinearity |
+|---:|---:|---:|---:|
+| 1 | 1.000 | 1.00 | 0.000 |
+| 2 | 1.136 | 2.00 | 0.509 |
+| 4 | 1.222 | 2.93 | 0.921 |
+| 8 | 1.204 | 2.53 | 0.985 |
+| 16 | 1.192 | 2.07 | 0.997 |
+
+For the clustered/uniform family, participation dimension stayed essentially
+at 1.00 while collinearity approached 1.0 as mode count increased. This is
+consistent with strongly redundant state coordinates when decay rates are
+closely spaced.
+
+For the wide/uniform family, the participation dimension rose to about 1.32
+at four modes and then remained near that level through 16 modes, while the
+temporal spread remained substantially longer than the clustered and
+logspread cases.
+
+The weight pattern also changed the geometry. In the wide 16-mode case, the
+weighted participation dimension was about 1.50 for fast-dominant weighting,
+versus about 1.06 for slow-dominant weighting. This is a coordinate- and
+weight-dependent representation effect, not evidence that either pattern is
+universally better.
+
+### Interpretation
+
+The first atlas result is therefore not “more SOE modes give more useful
+dimensions.” A more precise observation is:
+
+\[
+\text{mode count}
+\not\Rightarrow
+\text{independent temporal dimensions}.
+\]
+
+The decay-rate distribution and weights determine how redundant or
+differentiated the state coordinates become for the tested signals.
+
+This is exactly why 13A is useful before introducing a task. It gives a
+controlled map of the representation space without allowing a classifier,
+receiver, or propagation model to hide the underlying geometry.
+
+These observations remain descriptive. The experiment has not established
+that any particular kernel geometry is useful for prediction, classification,
+detection, propagation, or control.
