@@ -94,21 +94,24 @@ def channel(x,name,rng):
     ph=rng.uniform(0,2*np.pi,2); h=np.array([1,.45*np.exp(1j*ph[0]),.25*np.exp(1j*ph[1])],complex); h/=np.sqrt(np.sum(abs(h)**2))
     return np.convolve(x,h)[:len(x)],h
 
-def estimate_channel(tx,obs,mem):
+def estimate_channel(tx,obs,mem,taps):
     _,_,_,_,h=state_model(mem,64)
     z=toeplitz_apply(h,tx)
-    taps=3
     X=np.column_stack([z[taps-1-k:len(z)-k] for k in range(taps)])
     d=obs[taps-1:]
     return np.linalg.lstsq(X,d,rcond=None)[0]
 
 def state_receiver(tx_train,obs_train,obs_test,mem,h_est,ridge=1e-3):
-    _,_,_,_,h=state_model(mem,256)
-    # Build the combined structured state/channel impulse response.
+    _,_,_,_,h=state_model(mem,512)
     combined=np.convolve(h,h_est)
-    n=len(obs_test)
-    H=conv_matrix(combined,n)
-    return ridge_solve(H,obs_test,ridge)
+    prefix=np.asarray(tx_train)
+    known=np.zeros(len(obs_test),dtype=complex)
+    for i,idx in enumerate(np.arange(len(prefix),len(prefix)+len(obs_test))):
+        k=min(idx+1,len(combined),len(prefix))
+        known[i]=np.dot(combined[:k],prefix[idx::-1][:k])
+    innovation=obs_test-known
+    H=conv_matrix(combined,len(obs_test))
+    return ridge_solve(H,innovation,ridge)
 
 def complexity(mem):
     m=len(SOE_MEMORIES[mem][0])
@@ -130,14 +133,14 @@ def run_case(name,gen,mem,ch,seed,snr):
             # Training channel estimate uses known SOE structure but only the
             # training symbols. Held-out recovery then estimates the unknown
             # input sequence through the fixed state realization.
-            h_est=estimate_channel(tx[tr],r[tr],mem)
+            h_est=estimate_channel(tx[tr],r[tr],mem,1 if ch in ("identity","flat_rayleigh") else 3)
             z=state_receiver(tx[tr],r[tr],r[te],mem,h_est)
             pr=np.nan
         p,s,mac=complexity(mem) if rec=="soe_state" else ((0,0,0) if rec=="raw" else ((7,6,7) if rec=="fir7" else (4,2,4)))
         rows.append(dict(experiment="12C_SOE_state_input_estimation",signal=name,memory=mem,channel=ch,receiver=rec,snr_db=snr,seed=seed,
                          evm_percent=100*evm(tx[te],z),ber=ber(name,tx[te],z),heldout_mse=float(np.mean(abs(z-tx[te])**2)),
                          parameter_count=p,state_dimension=s,macs_per_sample=mac,effective_memory_samples=s,
-                         channel_estimate_error=float(np.linalg.norm(h_est-np.array([1.0]) if ch=="identity" else h_est-h_est)) if rec=="soe_state" else np.nan))
+                         channel_estimate_norm=float(np.linalg.norm(h_est)) if rec=="soe_state" else np.nan))
     return rows
 
 def main():
