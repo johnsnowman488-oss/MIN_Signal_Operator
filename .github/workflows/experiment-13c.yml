@@ -1,0 +1,33 @@
+name: experiment-13c
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "experiments/13C-1_environment_to_kernel_geometry.py"
+      - ".github/workflows/experiment-13c.yml"
+      - "docs/experiments/13C_Environment_Kernel_Geometry.md"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install research dependencies
+        run: pip install -e ".[test,research]"
+      - name: Run tests
+        run: pytest -q
+      - name: Run Experiment 13C-1
+        run: python experiments/13C-1_environment_to_kernel_geometry.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-13c-1-results
+          path: |
+            experiments/results/13C-1_environment_to_kernel_geometry_results.csv
+            experiments/results/13C-1_environment_to_kernel_geometry_summary.csv
+            experiments/results/13C-1_environment_to_kernel_geometry_summary.json
