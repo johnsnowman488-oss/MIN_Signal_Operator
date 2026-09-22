@@ -29,7 +29,7 @@ The roadmap therefore separates **forward transformation**, **propagation**, **r
 7. **Digital communication transformation** — establish BPSK/QPSK/16-QAM distortion under controlled MIN memory.
 8. **AWGN receiver compensation** — test whether conventional receiver memory can undo the transformation on held-out symbols.
 9. **Multipath/fading separation** — separate ordinary propagation distortion from MIN-induced memory.
-10. **Receiver recoverability ladder** — compare raw, finite FIR, longer FIR, IIR/state-space, SOE, and MIN-aware receivers using identical channel/data realizations. Experiment 12A is the generic-complexity baseline; Experiment 12B tests explicit SOE/MIN structure.
+10. **Receiver recoverability ladder** — compare raw, finite FIR, longer FIR, IIR/state-space, SOE, and MIN-aware receivers using identical channel/data realizations. Experiment 12A is the generic-complexity baseline; Experiment 12B tests explicit SOE/MIN structure; Experiment 12C tests explicit SOE state/input inversion.
 11. **Matched-complexity study** — compare parameter count, state dimension, latency/memory horizon, MACs/sample, training cost, BER, EVM, and held-out residual rather than declaring a universal winner.
 12. **Forward preservation study** — explicitly measure waveform preservation through propagation, rather than inferring preservation from receiver BER.
 13. **Transform-domain stability study** — test whether a deliberately MIN-transformed representation is more stable under specified propagation disturbances.
@@ -64,7 +64,7 @@ A positive result at each stage must therefore be demonstrated independently.
 
 Experiments 01–11 establish the numerical/operator foundation, kernel identification, signal atlas, spectral/finite-horizon behavior, digital-signal distortion, AWGN compensation, and controlled multipath/fading receiver behavior.
 
-The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Neither experiment establishes irreversibility, signal preservation, or a communication advantage.
+The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Experiment 12C then tests explicit SOE state/input inversion: the matched noiseless state realization is accurate, but the direct causal inverse becomes poorly conditioned under noise and channel estimation. These experiments do not establish irreversibility, signal preservation, or a communication advantage.
 
 The immediate research target is therefore:
 
