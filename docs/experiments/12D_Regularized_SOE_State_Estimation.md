@@ -98,10 +98,10 @@ Every estimator records:
 - EVM;
 - BER;
 - held-out MSE;
-- a noise-amplification proxy;
+- a regularization-displacement metric relative to the unregularized least-squares solution;
 - SOE state dimension;
 - parameter count;
-- MACs/sample;
+- a reference batch-estimator cost estimate (not an online SOE MAC count);
 - estimated versus true channel norm;
 - retained singular values for TSVD.
 
@@ -162,3 +162,46 @@ effort toward the refined MIN objective:
 
 rather than continuing to treat waveform recovery as the definition of a
 useful MIN transform.
+
+
+## Implementation validation
+
+The 12D implementation was corrected before interpreting the final grid.
+
+First, the SOE Markov-parameter realization was corrected so that for
+\(x_{n+1}=Ax_n+Bu_n\), \(y_n=Cx_n+Du_n\),
+
+\[
+h_0=D,\qquad h_n=CA^{n-1}B.
+\]
+
+Thus the fitted first \(m\) non-direct Markov parameters use powers
+\(0,\ldots,m-1\), not \(1,\ldots,m\).
+
+Second, the exact-channel control uses the actual symbol-rate impulse of the
+sample-rate forward pipeline. This is important for the 3-tap multipath case:
+sample-rate channel taps cannot be naively multiplied with a symbol-rate SOE
+impulse response when the observation is formed after symbol sampling.
+
+The final run therefore validates:
+
+\[
+\text{exact model}+
+\text{exact channel}+
+\text{noiseless}
+\Rightarrow
+\text{direct inversion at numerical precision}.
+\]
+
+The final grid contains 18,000 estimator rows, with 17,998 finite rows.
+The two non-finite rows are direct inversions in a low-SNR, two-scale,
+3-tap multipath condition; they are retained as evidence of numerical
+instability rather than silently discarded.
+
+The field previously called a “noise-amplification proxy” is now interpreted
+as regularization displacement from the unregularized least-squares solution.
+It should not be presented as a physical perturbation gain.
+
+Likewise, the reported computational-cost field is a reference cost for the
+implemented dense batch estimator. It must not be confused with the
+low-dimensional online SOE state-update cost.
