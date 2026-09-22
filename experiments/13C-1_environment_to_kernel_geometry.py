@@ -131,7 +131,7 @@ def basis_geometry(gammas: np.ndarray, weights: np.ndarray) -> dict:
     # the realized kernel geometry through its fitted positive weights, so a
     # weighted Gram geometry is the environment-dependent basis descriptor.
     wgram = np.sqrt(weights)[:, None] * gram * np.sqrt(weights)[None, :]
-    out.update(spectrum_metrics(np.linalg.eigvalsh(wgram), "weighted_basis")
+    out.update(spectrum_metrics(np.linalg.eigvalsh(wgram), "weighted_basis"))
     diag = np.sqrt(np.maximum(np.diag(gram), 0.0))
     corr = gram / np.outer(np.maximum(diag, np.finfo(float).tiny),
                            np.maximum(diag, np.finfo(float).tiny))
@@ -237,7 +237,7 @@ def run_case(signal_name, generator, environment_name, seed):
     row.update(state_geometry(q, weights))
     row["weighted_basis_to_state_entropy_ratio"] = (
         row["state_entropy_dimension"] / row["weighted_basis_entropy_dimension"]
-        if row["basis_entropy_dimension"] > 0 else float("nan")
+        if row["weighted_basis_entropy_dimension"] > 0 else float("nan")
     )
     return row
 
