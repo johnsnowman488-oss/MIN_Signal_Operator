@@ -66,23 +66,22 @@ Experiments 01–11 establish the numerical/operator foundation, kernel identifi
 
 The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Experiment 12C then tests an explicit SOE state realization followed by direct, unregularized causal inversion: the matched noiseless realization is accurate, but the direct inverse becomes poorly conditioned under noise and channel estimation. This is a statement about a particular recovery path, not a verdict on MIN as a transformation. These experiments do not establish irreversibility, signal preservation, communication advantage, or propagation advantage.
 
-The immediate receiver-side research target is therefore:
+The receiver-recoverability branch through Experiment 12D is now closed for its current controlled scope. The immediate research target is the forward representation question:
 
 [
-oxed{
-	ext{MIN transform}
-ightarrow
-	ext{propagation}
-ightarrow
-	ext{receiver}
-ightarrow
-	ext{recoverability}
-ightarrow
-	ext{complexity}
+\\boxed{
+\\text{kernel geometry}
+\\rightarrow
+\\text{MIN transform}
+\\rightarrow
+\\text{temporal state/feature representation}
+\\rightarrow
+\\text{task utility}
 }
 ]
 
-with matched controls at every stage. In parallel, the project should keep open the transform-design question: whether appropriate kernels and SOE realizations can deliberately distribute signal structure over a useful temporal representation rather than treating every non-identity output as unwanted distortion.
+Experiment 13A-1 begins this branch with a controlled Kernel-SOE Geometry Atlas. It varies SOE mode count, decay-rate geometry, and positive weights without channels, noise, receivers, or downstream task models. The purpose is to characterize representation geometry before asking whether any representation is useful for prediction, classification, detection, propagation, or control.
+
 
 ### Baseline policy
 
@@ -128,3 +127,5 @@ The notebooks are experiments rather than the source of truth; reusable logic be
 ## Status
 
 Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Experiment 09 establishes that the tested memory transformations produce substantial temporal distortion in sampled digital signals. Experiment 10 tests whether that distortion is compensable by a receiver using controlled AWGN and held-out FIR equalization. Experiment 11 adds normalized flat Rayleigh and 3-tap multipath channels. Experiment 12A expands the receiver ladder to FIR-7/15/31 and IIR-2/4/8. Experiment 12B adds an SOE/MIN-structured receiver whose denominator is derived from the sampled SOE realization. The executed 12B run contains 1,800 rows across two SOE memories, three signal families, three channels, four SNRs, five seeds, and five receiver variants; the workflow completed with the test suite passing. The current result is that the SOE-aware receiver remains compact but does not outperform the generic baselines in held-out EVM/BER. These observations do not establish a communication advantage for MIN.
+
+Experiment 13A-1 has been executed successfully with 675 rows. Its first result is that increasing SOE mode count does not automatically create independent temporal dimensions: closely clustered decay rates become highly redundant, while widely separated rates produce somewhat higher but still modest effective dimensions for the tested digital signals. These are representation measurements, not evidence of task advantage.
