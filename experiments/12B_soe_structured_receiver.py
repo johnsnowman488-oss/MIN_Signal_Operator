@@ -23,7 +23,7 @@ from min.metrics.equalization import (
     apply_iir_equalizer,
     design_fir_equalizer,
     design_iir_equalizer,
-    design_soe_structured_equalizer,
+    design_fixed_denominator_equalizer,
     evm,
 )
 from min.signals import generate_16qam, generate_bpsk, generate_qpsk
@@ -34,7 +34,7 @@ SOE_MEMORIES = {
     "soe_two_scale": (np.array([0.7, 0.3]), np.array([2.0, 30.0])),
 }
 CHANNELS = ("identity", "flat_rayleigh", "multipath_3tap")
-RECEIVERS = ("raw", "fir7", "iir2", "soe_structured")
+RECEIVERS = ("raw", "fir7", "iir2", "soe_exact", "soe_stable")
 SNR_DB = (0.0, 10.0, 20.0, 30.0)
 NUM_SYMBOLS = 512
 TRAIN_SYMBOLS = 128
@@ -42,6 +42,7 @@ SPS = 16
 SYMBOL_RATE = 100.0
 SEEDS = tuple(range(5))
 DT = 1.0 / SYMBOL_RATE
+SAMPLE_DT = 1.0 / (SYMBOL_RATE * SPS)
 
 
 def _bits(signal_name, symbols):
@@ -80,6 +81,36 @@ def _memory_filter(x, name):
     k = sum(w * np.exp(-g * lags) for w, g in zip(weights, gammas))
     k /= np.sum(k)
     return np.convolve(x, k, mode="full")[:x.size]
+
+def _soe_inverse_feedback(memory):
+    """Derive the inverse denominator from the actual symbol-rate SOE realization."""
+    weights, gammas = SOE_MEMORIES[memory]
+    x = np.zeros(512, dtype=float)
+    x[:SPS] = 1.0
+    lags = np.arange(32 * SPS) * SAMPLE_DT
+    k = sum(w * np.exp(-g * lags) for w, g in zip(weights, gammas))
+    k /= np.sum(k)
+    y = np.convolve(x, k, mode="full")[:x.size]
+    h = y[np.arange(SPS // 2, x.size, SPS)]
+    poles = np.exp(-gammas * DT)
+    denominator = np.array([1.0], dtype=complex)
+    for pole in poles:
+        denominator = np.polynomial.polynomial.polymul(denominator, [1.0, -pole])
+    forward_numerator = np.convolve(h, denominator)[:denominator.size]
+    forward_numerator /= forward_numerator[0]
+
+    exact_feedback = -forward_numerator[1:]
+    roots = np.roots(forward_numerator[::-1]) if forward_numerator.size > 1 else np.array([])
+    stable_roots = np.array([
+        1.0 / np.conj(root) if abs(root) > 1.0 else root for root in roots
+    ])
+    if stable_roots.size:
+        stable_denominator = np.poly(stable_roots)[::-1]
+        stable_denominator = stable_denominator / stable_denominator[0]
+        stable_feedback = -stable_denominator[1:]
+    else:
+        stable_feedback = np.array([], dtype=complex)
+    return exact_feedback, stable_feedback, float(np.max(np.abs(roots))) if roots.size else 0.0
 
 
 def _channel(x, name, rng):
@@ -138,16 +169,16 @@ def _run_case(signal_name, generator, memory, channel, seed, snr_db):
             )
             estimate = apply_iir_equalizer(observed, b, a)[test]
         else:
-            b, a, inverse_zero_radius = design_soe_structured_equalizer(
-                observed[train], tx[train], weights, gammas, DT,
+            exact_feedback, stable_feedback, inverse_zero_radius = _soe_inverse_feedback(memory)
+            feedback = exact_feedback if receiver == "soe_exact" else stable_feedback
+            b = design_fixed_denominator_equalizer(
+                observed[train], tx[train], feedback,
                 numerator_order=len(weights) + 1, ridge=1e-5,
             )
-            estimate = apply_iir_equalizer(observed, b, a)[test] if a.size else (
-                np.convolve(observed, b, mode="full")[:observed.size]
-            )[test]
-            pole_radius = float(np.max(np.abs(np.linalg.eigvals(
-                np.pad(a.reshape(1, -1), ((0, max(0, a.size - 1)), (0, max(0, a.size - 1)))) if False else np.array([[a[0] if a.size else 0]])
-            )))) if False else (float(np.max(np.abs(a))) if a.size else 0.0)
+            estimate = apply_iir_equalizer(observed, b, feedback)[test]
+            pole_radius = float(np.max(np.abs(np.roots(
+                np.r_[1.0, -feedback]
+            )))) if feedback.size else 0.0
 
         params, states, macs = _complexity(receiver, memory)
         rows.append({
@@ -199,7 +230,7 @@ def main():
         "snr_db": list(SNR_DB),
         "seeds": list(SEEDS),
         "evaluation": "384 held-out symbols after 128-symbol training prefix",
-        "structure": "SOE poles are fixed from known weights/gammas; only the feedforward numerator is learned.",
+        "structure": "Symbol-rate SOE poles are fixed from known weights/gammas and the sampled rectangular-pulse realization; only the feedforward numerator is learned. soe_exact uses the resulting causal inverse denominator; soe_stable reflects unstable inverse poles inside the unit circle.",
         "boundary": "This tests the sampled SOE realization, not continuous MIN invertibility.",
     }
     (out / "12B_soe_structured_receiver_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
