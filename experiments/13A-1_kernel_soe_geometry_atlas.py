@@ -390,4 +390,3 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# Workflow trigger: validated atlas implementation is ready for CI execution.
