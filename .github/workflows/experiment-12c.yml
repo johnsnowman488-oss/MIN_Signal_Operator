@@ -2,6 +2,8 @@ name: experiment-12c
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   run-12c:
