@@ -1,0 +1,12 @@
+{
+  "experiment": "12B_SOE_structured_receiver",
+  "final_workflow_run": 35745554935,
+  "final_commit": "cb9968c11d9d73b19791b9555cca6ae369686f83",
+  "artifact_id": 10702718113,
+  "artifact_name": "experiment-12b-results",
+  "raw_rows": 1800,
+  "aggregate_file": "experiments/results/12B_summary_by_memory_snr.csv",
+  "aggregate_rows": 30,
+  "tests_reported_by_workflow": 40,
+  "note": "The raw 12B CSV and summary JSON are retained in the GitHub Actions artifact; the compact aggregate is committed to the repository for durable source-tree analysis."
+}
