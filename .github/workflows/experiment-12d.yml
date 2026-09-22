@@ -1,0 +1,29 @@
+name: experiment-12d
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "experiments/12D_regularized_soe_state_estimation.py"
+      - ".github/workflows/experiment-12d.yml"
+      - "docs/experiments/12D_Regularized_SOE_State_Estimation.md"
+
+jobs:
+  run-12d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[test,notebook]"
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Run Experiment 12D
+        run: python experiments/12D_regularized_soe_state_estimation.py
+      - name: Upload 12D results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-12d-results
+          path: experiments/results/12D_*
