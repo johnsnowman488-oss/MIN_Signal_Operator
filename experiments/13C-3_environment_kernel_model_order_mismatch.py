@@ -170,8 +170,14 @@ def main():
                 kernel_to_reference_l2 = float(
                     np.linalg.norm(fitted - ref_fitted) /
                     max(np.linalg.norm(ref_fitted), 1e-300))
-                row_base["kernel_fit_relative_l2"] = kernel_l2
-                row_base["kernel_to_reference_relative_l2"] = kernel_to_reference_l2
+                row_base = {
+                    "experiment": "13C-3_environment_kernel_model_order_mismatch",
+                    "environment": e, "seed": seed, "dictionary": dict_name,
+                    "dictionary_mode_count": len(gammas),
+                    "gamma_min_s_inverse": float(gammas.min()),
+                    "gamma_max_s_inverse": float(gammas.max()),
+                    "kernel_fit_relative_l2": kernel_l2,
+                    "kernel_to_reference_relative_l2": kernel_to_reference_l2,
                 }
                 row_base.update(geom)
                 row_base["reference_d_eff"] = ref_geom["gfe_d_eff"]
