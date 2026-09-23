@@ -7,6 +7,7 @@ name = "min-signal-operator"
 version = "0.1.0"
 description = "Research implementation of the Memory-Integrated Network signal operator"
 readme = "README.md"
+license = { text = "GPL-3.0-only" }
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 
