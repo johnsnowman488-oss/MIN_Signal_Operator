@@ -69,7 +69,7 @@ def main():
          base={"experiment":"13C-2_finite_observation_kernel_uncertainty","environment":e,"seed":seed,"observation_length":n,"observation_duration_s":n*DT,"snr_db":snr,
                "covariance_relative_l2_error":rel(c,env(t,e)),"covariance_integral_relative_error":abs(trapezoid(c,t)-trapezoid(env(t,e),t))/max(abs(trapezoid(env(t,e),t)),1e-12),
                "kernel_fit_relative_l2":rel(fitted,c),"kernel_fit_r2":float(1-np.sum((fitted-c)**2)/max(np.sum((c-c.mean())**2),1e-300)),
-               "kernel_weight_relative_l2_error":rel(w,ow),"kernel_weight_max_abs_error":float(np.max(abs(w-ow))}
+               "kernel_weight_relative_l2_error":rel(w,ow),"kernel_weight_max_abs_error":float(np.max(abs(w-ow)))}
          base.update(gfe(w)); base.update(basis(w))
          for k,v in om.items(): base["oracle_"+k]=v
          base["d_eff_relative_error"]=abs(base["gfe_d_eff"]-om["gfe_d_eff"])/max(abs(om["gfe_d_eff"]),1e-300)
