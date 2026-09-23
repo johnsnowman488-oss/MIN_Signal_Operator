@@ -32,7 +32,7 @@ The oracle 13C-1 kernel remains available for each environment, allowing separat
 
 The environment realization is synthesized as a stationary Gaussian process with the prescribed 13C-1 covariance envelope. Measurement noise is then added at the selected SNR.
 
-The covariance estimator is the unbiased sample autocovariance, normalized by its observed zero-lag value. A nonnegative least-squares fit then identifies the kernel weights on the fixed SOE dictionary.
+The covariance estimator is the unbiased sample autocovariance, normalized by its observed zero-lag value. All observation lengths are evaluated on the same 0.08 s physical lag window, so changing N does not silently change the covariance-error domain. A nonnegative least-squares fit then identifies the kernel weights on the fixed SOE dictionary.
 
 This deliberately tests **environment estimation and kernel uncertainty**, not model-order mismatch.
 
