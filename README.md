@@ -44,17 +44,17 @@ The roadmap therefore separates **forward transformation**, **propagation**, **r
 The research should distinguish four increasingly strong conclusions:
 
 [
-oxed{
-	ext{MIN transforms signals}
+\\boxed{
+\\text{MIN transforms signals}
 ;
-otRightarrow;
-	ext{MIN preserves signals}
+\\notRightarrow;
+\\text{MIN preserves signals}
 ;
-otRightarrow;
-	ext{MIN is efficiently invertible}
+\\notRightarrow;
+\\text{MIN is efficiently invertible}
 ;
-otRightarrow;
-	ext{MIN improves propagation}
+\\notRightarrow;
+\\text{MIN improves propagation}
 }
 ]
 
@@ -82,17 +82,16 @@ The receiver-recoverability branch through Experiment 12D is now closed for its 
 
 Experiment 13A-1 begins this branch with a controlled Kernel-SOE Geometry Atlas. It varies SOE mode count, decay-rate geometry, and positive weights without channels, noise, receivers, or downstream task models. The purpose is to characterize representation geometry before asking whether any representation is useful for prediction, classification, detection, propagation, or control.
 
-
 ### Baseline policy
 
 The present MIN operator is linear. Therefore the primary receiver comparison is:
 
 [
-	ext{FIR}
-ightarrow
-	ext{IIR/state-space}
-ightarrow
-	ext{SOE/MIN-aware receiver}.
+\\text{FIR}
+\\rightarrow
+\\text{IIR/state-space}
+\\rightarrow
+\\text{SOE/MIN-aware receiver}.
 ]
 
 Volterra and memory-polynomial models are deferred until a nonlinear-memory condition exists. Introducing them earlier would compare a nonlinear model class against a linear MIN condition without a matched task.
@@ -123,6 +122,12 @@ pip install -e ".[research]"
 ```
 
 The notebooks are experiments rather than the source of truth; reusable logic belongs in min/ and tests should accompany numerical claims.
+
+## License
+
+The MIN Signal Operator software and associated source code are released under the **GNU General Public License v3.0 only (GPL-3.0-only)**. See the [LICENSE](LICENSE) file for the complete license text.
+
+The GPL designation applies to project code covered by this repository's copyright. Third-party dependencies, datasets, documents, and other externally sourced materials remain subject to their respective licenses or terms.
 
 ## Status
 
