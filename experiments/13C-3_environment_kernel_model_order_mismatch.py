@@ -162,22 +162,16 @@ def main():
                 w = fit(t, c, gammas)
                 fitted = np.exp(-np.outer(t, gammas)) @ w
                 geom = kernel_metrics(w, gammas)
-                # Project the mismatched kernel onto the reference-rate dictionary
-                # only for a comparable coefficient-error diagnostic; geometry and
-                # state metrics remain native to each dictionary.
-                w_ref_on_native = fit(t, c, REFERENCE_GAMMAS)
+                # Compare fitted kernels in common physical time-domain space;
+                # coefficient vectors are dictionary-dependent and not comparable.
+                ref_fitted = np.exp(-np.outer(t, REFERENCE_GAMMAS)) @ ref_w
                 kernel_l2 = float(np.linalg.norm(fitted - c) /
                                   max(np.linalg.norm(c), 1e-300))
-                row_base = {
-                    "experiment": "13C-3_environment_kernel_model_order_mismatch",
-                    "environment": e, "seed": seed,
-                    "dictionary": dict_name, "dictionary_mode_count": len(gammas),
-                    "gamma_min_s_inverse": float(gammas.min()),
-                    "gamma_max_s_inverse": float(gammas.max()),
-                    "kernel_fit_relative_l2": kernel_l2,
-                    "kernel_weight_relative_l2_to_reference": float(
-                        np.linalg.norm(w_ref_on_native - ref_w) /
-                        max(np.linalg.norm(ref_w), 1e-300)),
+                kernel_to_reference_l2 = float(
+                    np.linalg.norm(fitted - ref_fitted) /
+                    max(np.linalg.norm(ref_fitted), 1e-300))
+                row_base["kernel_fit_relative_l2"] = kernel_l2
+                row_base["kernel_to_reference_relative_l2"] = kernel_to_reference_l2
                 }
                 row_base.update(geom)
                 row_base["reference_d_eff"] = ref_geom["gfe_d_eff"]
@@ -195,8 +189,7 @@ def main():
                 for signal_name, signal in sigs.items():
                     q = states(signal, gammas)
                     sg = stategeom(q, w)
-                    rq = stategeom(ref_q if signal_name == "BPSK"
-                                   else states(signal, REFERENCE_GAMMAS), ref_w)
+                    rq = stategeom(states(signal, REFERENCE_GAMMAS), ref_w)
                     r = dict(row_base)
                     r["signal"] = signal_name
                     r.update(sg)
@@ -223,7 +216,7 @@ def main():
 
     group_keys = ("environment", "dictionary")
     metrics = (
-        "kernel_fit_relative_l2", "gfe_d_eff",
+        "kernel_fit_relative_l2", "kernel_to_reference_relative_l2", "gfe_d_eff",
         "weighted_basis_participation_dimension",
         "normalized_basis_participation_dimension",
         "weighted_state_participation_dimension",
