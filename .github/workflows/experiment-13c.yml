@@ -9,6 +9,8 @@ on:
       - "docs/experiments/13C-2_Finite_Observation_Kernel_Uncertainty.md"
       - ".github/workflows/experiment-13c.yml"
       - "docs/experiments/13C_Environment_Kernel_Geometry.md"
+      - "experiments/13C-3_environment_kernel_model_order_mismatch.py"
+      - "docs/experiments/13C-3_Environment_Kernel_Model_Order_Mismatch.md"
 
 jobs:
   run:
@@ -35,6 +37,16 @@ jobs:
             experiments/results/13C-1_environment_to_kernel_geometry_results.csv
             experiments/results/13C-1_environment_to_kernel_geometry_summary.csv
             experiments/results/13C-1_environment_to_kernel_geometry_summary.json
+      - name: Run Experiment 13C-3
+        run: python experiments/13C-3_environment_kernel_model_order_mismatch.py
+      - name: Upload 13C-3 results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-13c-3-results
+          path: |
+            experiments/results/13C-3_environment_kernel_model_order_mismatch_results.csv
+            experiments/results/13C-3_environment_kernel_model_order_mismatch_summary.csv
+            experiments/results/13C-3_environment_kernel_model_order_mismatch_summary.json
       - name: Upload 13C-2 results
         uses: actions/upload-artifact@v4
         with:
