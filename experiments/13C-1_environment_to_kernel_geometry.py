@@ -28,6 +28,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
+from scipy.integrate import trapezoid
 from scipy.optimize import nnls
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -175,11 +176,11 @@ def state_geometry(q: np.ndarray, weights: np.ndarray) -> dict:
 
 def environment_metrics(t: np.ndarray, c: np.ndarray) -> dict:
     """Descriptors of the environment covariance geometry."""
-    mass = float(np.trapz(c, t))
-    first_moment = float(np.trapz(t * c, t))
+    mass = float(trapezoid(c, t))
+    first_moment = float(trapezoid(t * c, t))
     half = int(np.searchsorted(c <= 0.5, True))
     t_half = float(t[min(half, len(t) - 1)])
-    area2 = float(np.trapz(c * c, t))
+    area2 = float(trapezoid(c * c, t))
     return {
         "env_correlation_integral_s": mass,
         "env_correlation_centroid_s": first_moment / mass if mass > 0 else float("nan"),
