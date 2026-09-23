@@ -11,7 +11,7 @@ SIGNALS={"BPSK":generate_bpsk,"QPSK":generate_qpsk,"16QAM":generate_16qam}
 ENVIRONMENTS=("white_limit","short","multiscale","powerlaw","squared_exp")
 SEEDS=tuple(range(4)); OBS_LENGTHS=(512,2048,8192); SNR_DB=(0.0,10.0,20.0,30.0)
 NUM_SYMBOLS,SPS,SYMBOL_RATE=512,16,100.0; SAMPLE_RATE=SYMBOL_RATE*SPS; DT=1/SAMPLE_RATE
-HORIZON_S=NUM_SYMBOLS/SYMBOL_RATE; FIT_HORIZON_S=2.0; GAMMAS=np.geomspace(0.5,100.0,16)
+HORIZON_S=NUM_SYMBOLS/SYMBOL_RATE; FIT_HORIZON_S=0.08; GAMMAS=np.geomspace(0.5,100.0,16)
 def env(t,name):
     if name=="white_limit": return np.exp(-t/.005)
     if name=="short": return np.exp(-t/.05)
@@ -64,9 +64,9 @@ def main():
        for n in OBS_LENGTHS:
         latent=synth(e,n,seed)
         for snr in SNR_DB:
-         x=noisy(latent,snr,seed+n); maxlag=min(n//4,int(FIT_HORIZON_S/DT)); t,c=cov_est(x,maxlag); sel=t<=FIT_HORIZON_S; t,c=t[sel],c[sel]
+         x=noisy(latent,snr,seed+n); maxlag=int(FIT_HORIZON_S/DT); t,c=cov_est(x,maxlag); sel=t<=FIT_HORIZON_S; t,c=t[sel],c[sel]
          w=fit(t,c); fitted=np.exp(-np.outer(t,GAMMAS))@w
-         base={"experiment":"13C-2_finite_observation_kernel_uncertainty","environment":e,"seed":seed,"observation_length":n,"observation_duration_s":n*DT,"snr_db":snr,
+         base={"experiment":"13C-2_finite_observation_kernel_uncertainty","environment":e,"seed":seed,"observation_length":n,"observation_duration_s":n*DT,"snr_db":snr,"fit_horizon_s":FIT_HORIZON_S,
                "covariance_relative_l2_error":rel(c,env(t,e)),"covariance_integral_relative_error":abs(trapezoid(c,t)-trapezoid(env(t,e),t))/max(abs(trapezoid(env(t,e),t)),1e-12),
                "kernel_fit_relative_l2":rel(fitted,c),"kernel_fit_r2":float(1-np.sum((fitted-c)**2)/max(np.sum((c-c.mean())**2),1e-300)),
                "kernel_weight_relative_l2_error":rel(w,ow),"kernel_weight_max_abs_error":float(np.max(abs(w-ow)))}
