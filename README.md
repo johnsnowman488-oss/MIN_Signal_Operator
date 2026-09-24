@@ -80,7 +80,9 @@ The receiver-recoverability branch through Experiment 12D is now closed for its 
 }
 ]
 
-Experiment 13A-1 begins this branch with a controlled Kernel-SOE Geometry Atlas. It varies SOE mode count, decay-rate geometry, and positive weights without channels, noise, receivers, or downstream task models. The purpose is to characterize representation geometry before asking whether any representation is useful for prediction, classification, detection, propagation, or control.
+Experiment 13A-1 begins this branch with a controlled Kernel-SOE Geometry Atlas.
+
+Experiments 13B and 13C-1 through 13C-3 extend this branch from kernel geometry to realized temporal state geometry and environment-derived kernel construction. 13C-1 establishes the oracle environment → kernel mapping; 13C-2 measures finite-observation uncertainty; 13C-3 tests SOE rate-support and model-order mismatch. A consolidated research notebook, `notebooks/13C_environment_kernel_temporal_representation.ipynb`, consumes the three CSV result sets, generates the relevant plots, and can regenerate the CSV artifacts through the existing experiment scripts. It varies SOE mode count, decay-rate geometry, and positive weights without channels, noise, receivers, or downstream task models. The purpose is to characterize representation geometry before asking whether any representation is useful for prediction, classification, detection, propagation, or control.
 
 ### Baseline policy
 
