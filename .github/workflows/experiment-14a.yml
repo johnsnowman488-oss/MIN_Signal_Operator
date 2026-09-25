@@ -1,5 +1,7 @@
 name: Experiment 14A
 
+# Push trigger retained so each implementation change launches the experiment.
+
 on:
   workflow_dispatch:
   push:
