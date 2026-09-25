@@ -192,12 +192,14 @@ def exact_piecewise_linear_states(
     # q[n] = decay*q[n-1] + b_curr*x[n] + b_prev*x[n-1].
     # The first sample remains at zero, matching SOEMemory.state_trajectory.
     filtered = np.empty((samples.size, gammas.size), dtype=complex)
-    filtered[0] = 0.0
     for j, (a, bc, bp) in enumerate(zip(decay, b_curr, b_prev)):
+        forcing = np.empty(samples.size, dtype=complex)
+        forcing[0] = 0.0
+        forcing[1:] = bc * samples[1:] + bp * samples[:-1]
         filtered[:, j] = lfilter(
-            [bc, bp],
+            [1.0],
             [1.0, -a],
-            samples,
+            forcing,
         )
 
     return filtered
