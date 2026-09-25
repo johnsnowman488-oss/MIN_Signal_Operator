@@ -1,0 +1,30 @@
+name: Experiment 14A
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "experiments/14A_task_relevant_min_subspace.py"
+      - ".github/workflows/experiment-14a.yml"
+      - "min/**"
+      - "pyproject.toml"
+
+jobs:
+  run-14a:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install research dependencies
+        run: pip install -e ".[research]"
+      - name: Run Experiment 14A
+        run: python experiments/14A_task_relevant_min_subspace.py
+      - name: Upload 14A results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-14a-results
+          path: experiments/results/14A_task_relevant_min_subspace_*
