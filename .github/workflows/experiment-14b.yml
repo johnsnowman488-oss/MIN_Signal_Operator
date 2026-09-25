@@ -1,0 +1,38 @@
+name: Experiment 14B
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "experiments/14B_kernel_condition_task_recovery.py"
+      - ".github/workflows/experiment-14b.yml"
+      - "min/**"
+      - "pyproject.toml"
+  push:
+    paths:
+      - "experiments/14B_kernel_condition_task_recovery.py"
+      - ".github/workflows/experiment-14b.yml"
+      - "min/**"
+      - "pyproject.toml"
+
+jobs:
+  run-14b:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install research dependencies
+        run: pip install -e ".[research,test]"
+      - name: Run targeted 14B tests
+        run: pytest -q tests/test_experiment_14b.py tests/test_soe_memory_state.py
+      - name: Run Experiment 14B
+        run: python experiments/14B_kernel_condition_task_recovery.py
+      - name: Upload 14B results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-14b-results
+          path: experiments/results/14B_kernel_condition_task_recovery_*
