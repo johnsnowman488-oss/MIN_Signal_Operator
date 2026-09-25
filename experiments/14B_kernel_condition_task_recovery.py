@@ -294,6 +294,16 @@ def kernel_descriptors(
     }
 
 
+def min_scalar_trajectory(
+    x: np.ndarray,
+    gammas: np.ndarray,
+    weights: np.ndarray,
+) -> np.ndarray:
+    """Return the scalar MIN/SOE output z[n] = sum_j w_j q_j[n]."""
+    q = exact_piecewise_linear_states(x, gammas, weights)
+    return q @ weights
+
+
 def state_geometry(q: np.ndarray) -> dict:
     centered = q - np.mean(q, axis=0, keepdims=True)
     cov = centered.conj().T @ centered / max(q.shape[0] - 1, 1)
@@ -378,15 +388,18 @@ def run_case(
             gammas, weights = oracle_kernels[condition_environment]
             estimate_meta = {}
 
-        q_train = min_state_trajectory(y_train, gammas, weights)
-        q_test = min_state_trajectory(y_test, gammas, weights)
-        X_train, symbols_train = state_features(q_train, train.symbols)
-        X_test, symbols_test = state_features(q_test, test.symbols)
+        z_train = min_scalar_trajectory(y_train, gammas, weights)
+        z_test = min_scalar_trajectory(y_test, gammas, weights)
+        centers_train = np.arange(len(train.symbols), dtype=int) * SPS + SPS // 2
+        centers_test = np.arange(len(test.symbols), dtype=int) * SPS + SPS // 2
+        X_train = z_train[centers_train, None]
+        X_test = z_test[centers_test, None]
+        symbols_train = np.asarray(train.symbols, dtype=complex)
+        symbols_test = np.asarray(test.symbols, dtype=complex)
 
         beta = linear_readout_fit(X_train, symbols_train)
         pred = linear_readout_predict(X_test, beta)
         condition_nmse = nmse(symbols_test, pred)
-        geom = state_geometry(q_train)
 
         oracle_weights = oracle_kernels[environment][1]
         ref_fit = np.exp(-np.outer(
@@ -407,7 +420,8 @@ def run_case(
             "condition": condition,
             "condition_environment": condition_environment,
             "mismatch_environment": MISMATCH_MAP[environment] if condition == "mismatched" else "",
-            "full_state_dimension": int(len(gammas)),
+            "modal_state_dimension": int(len(gammas)),
+            "representation_dimension": 1,
             "heldout_symbol_nmse": float(condition_nmse),
             "raw_center_sample_nmse": float(raw_nmse),
             "nmse_delta_vs_raw": float(condition_nmse - raw_nmse),
@@ -578,14 +592,15 @@ def main() -> None:
         "primary_metric": "heldout_symbol_nmse",
         "comparison_metric": "nmse_ratio_to_informed",
         "representation": (
-            "full 16-mode repository SOEMemory state; PCA is intentionally omitted so "
-            "kernel-condition effects are separated from 14A task-dimension effects"
+            "scalar repository SOEMemory/MIN output z=w^T q; the kernel weights therefore "
+            "directly affect the task representation. PCA is intentionally omitted."
         ),
         "mismatch_map": MISMATCH_MAP,
         "accelerated_state_equivalence_check": "single startup comparison against repository SOEMemory.state_trajectory",
         "boundaries": [
             "This is an H2 environment-alignment test, not a universal performance benchmark.",
             "The raw observation remains a control because 14A established it as a viable task representation.",
+
             "No claim is made that the estimated condition must outperform the mismatched or raw condition.",
             "No BER, EVM, neural network, or task-optimized kernel is used.",
             "D_eff is recorded as a kernel-complexity descriptor and is not equated with task dimension.",
