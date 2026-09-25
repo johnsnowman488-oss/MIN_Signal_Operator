@@ -49,3 +49,18 @@ def test_estimated_kernel_is_normalized_and_finite():
     assert np.all(np.isfinite(weights))
     assert np.all(weights >= 0.0)
     assert np.isfinite(meta["estimation_kernel_fit_relative_l2"])
+
+
+def test_kernel_weights_affect_scalar_min_output():
+    x = np.sin(np.linspace(0.0, 8.0, 257)) + 0.3 * np.cos(np.linspace(0.0, 19.0, 257))
+    gammas = np.geomspace(0.5, 100.0, 16)
+    weights_a = np.full(16, 1.0 / 16.0)
+    weights_b = np.linspace(1.0, 2.0, 16)
+    weights_b /= weights_b.sum()
+
+    za = module.min_scalar_trajectory(x, gammas, weights_a)
+    zb = module.min_scalar_trajectory(x, gammas, weights_b)
+
+    assert not np.allclose(za, zb)
+    assert np.all(np.isfinite(za))
+    assert np.all(np.isfinite(zb))
