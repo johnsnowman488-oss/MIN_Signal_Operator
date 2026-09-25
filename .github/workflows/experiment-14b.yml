@@ -2,6 +2,12 @@ name: Experiment 14B
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "experiments/14B_kernel_condition_task_recovery.py"
+      - ".github/workflows/experiment-14b.yml"
+      - "min/**"
+      - "pyproject.toml"
   push:
     paths:
       - "experiments/14B_kernel_condition_task_recovery.py"
