@@ -13,7 +13,7 @@ The observed task signal is held fixed across four representation conditions:
 3. **mismatched** — oracle kernel belonging to a different declared environment;
 4. **raw_center** — noisy observation at the symbol center, with no MIN/SOE state.
 
-The first three use the full 16-dimensional modal state and the same complex linear readout. PCA is deliberately omitted because Experiment 14A already established the state-dimension question.
+The MIN conditions use the scalar operator output z=w^T q and the same complex linear readout. PCA is deliberately omitted because Experiment 14A already established the full-state task-dimension question. The scalar output is essential here: with a fixed gamma dictionary, an unweighted full modal state depends on the decay rates rather than the fitted kernel weights, so weight-only kernel changes would not constitute a meaningful alignment intervention.
 
 ## Controlled grid
 
@@ -33,7 +33,7 @@ This experiment does not claim that any one representation is universally better
 
 14A asked how much of the full environment-informed MIN/SOE state is task-relevant.
 
-14B holds that representation at the full 16-state level and changes only the relationship between the kernel and the true environment. Thus:
+14B holds the downstream task and decoder fixed and changes the relationship between the MIN kernel and the true environment, using the scalar MIN output so that the kernel itself changes the representation. Thus:
 
 - 14A probes **task-relevant dimensionality**;
 - 14B probes **environment-kernel alignment**.
