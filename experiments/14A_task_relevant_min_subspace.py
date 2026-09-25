@@ -42,6 +42,7 @@ from scipy.optimize import nnls
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from min.kernels import SOEMemory
 from min.signals import generate_16qam, generate_bpsk, generate_qpsk
 
 
@@ -136,16 +137,26 @@ def colored_noise(
     return noise * math.sqrt(noise_power)
 
 
-def soe_states(x: np.ndarray, gammas: np.ndarray) -> np.ndarray:
-    """Exact zero-order-hold/exponential streaming state used consistently in 13C."""
-    poles = np.exp(-gammas * DT)
-    increments = -np.expm1(-gammas * DT) / gammas
-    state = np.zeros(len(gammas), dtype=complex)
-    out = np.empty((len(x), len(gammas)), dtype=complex)
-    for n, sample in enumerate(np.asarray(x, dtype=complex)):
-        state = poles * state + increments * sample
-        out[n] = state
-    return out
+def min_state_trajectory(
+    x: np.ndarray, gammas: np.ndarray, weights: np.ndarray
+) -> np.ndarray:
+    """Obtain the full MIN/SOE state through the repository operator API.
+
+    The returned columns are the modal memory states q_j. The fitted kernel
+    weights remain attached to the SOEMemory model and are not collapsed into
+    the scalar MIN output because 14A measures task-relevant structure in the
+    full state.
+    """
+    samples = np.asarray(x, dtype=complex)
+    t = np.arange(samples.size, dtype=float) * DT
+    return SOEMemory(weights, gammas).state_trajectory(t, samples)
+
+
+def raw_center_samples(
+    observed: np.ndarray, symbol_count: int, sps: int
+) -> np.ndarray:
+    """Return the noisy observation-space control at symbol centers."""
+    return np.asarray(observed).reshape(symbol_count, sps)[:, sps // 2]
 
 
 def symbol_center_rows(state: np.ndarray, symbols: np.ndarray, sps: int) -> tuple[np.ndarray, np.ndarray]:
@@ -233,8 +244,8 @@ def run_case(signal_name: str, generator, environment: str, snr_db: float, seed:
     y_train = x_train + noise_train
     y_test = x_test + noise_test
 
-    q_train = soe_states(y_train, gammas)
-    q_test = soe_states(y_test, gammas)
+    q_train = min_state_trajectory(y_train, gammas, weights)
+    q_test = min_state_trajectory(y_test, gammas, weights)
 
     X_train, y_train_symbols = symbol_center_rows(q_train, train.symbols, SPS)
     X_test, y_test_symbols = symbol_center_rows(q_test, test.symbols, SPS)
@@ -267,8 +278,8 @@ def run_case(signal_name: str, generator, environment: str, snr_db: float, seed:
     d_task = task_dimension(full_nmse, curve)
 
     # Raw observation linear-readout control at symbol centers.
-    raw_train = y_train.reshape(NUM_TRAIN_SYMBOLS, SPS)[:, SPS // 2]
-    raw_test = y_test.reshape(NUM_TEST_SYMBOLS, SPS)[:, SPS // 2]
+    raw_train = raw_center_samples(y_train, NUM_TRAIN_SYMBOLS, SPS)
+    raw_test = raw_center_samples(y_test, NUM_TEST_SYMBOLS, SPS)
     raw_beta = linear_readout_fit(raw_train[:, None], train.symbols)
     raw_nmse = nmse(test.symbols, linear_readout_predict(raw_test[:, None], raw_beta))
 
@@ -344,6 +355,8 @@ def main():
         "cases": expected_cases,
         "rows": expected_rows,
         "primary_metric": "heldout_symbol_nmse",
+        "min_representation": "repository SOEMemory.state_trajectory with fitted oracle kernel weights/gammas; full modal states retained",
+        "raw_control_representation": "noisy y_train/y_test center samples only",
         "task_dimension_definition": (
             "smallest retained complex PCA dimension whose held-out NMSE is <= "
             f"{TASK_TOLERANCE:.2f} times the full-state reference NMSE"
@@ -354,6 +367,7 @@ def main():
             "PCA and linear readout fit only on training symbols",
             "raw center-sample linear readout control",
             "same signal/environment/SNR/seed grid across PCA dimensions",
+            "repository SOEMemory state_trajectory used for MIN/SOE representation",
         ],
         "explicit_exclusions": [
             "no BER",
