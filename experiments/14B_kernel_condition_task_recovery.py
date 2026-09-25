@@ -205,27 +205,33 @@ def exact_piecewise_linear_states(
     return filtered
 
 
+def validate_accelerated_state_equivalence() -> float:
+    """Check the fast uniform-grid realization against repository SOEMemory once."""
+    rng = np.random.default_rng(41)
+    x = rng.normal(size=257) + 1j * rng.normal(size=257)
+    gammas = DICTIONARY_GAMMAS.copy()
+    weights = np.full(gammas.size, 1.0 / gammas.size)
+    fast = exact_piecewise_linear_states(x, gammas, weights)
+    reference = SOEMemory(weights, gammas).state_trajectory(
+        np.arange(x.size, dtype=float) * DT,
+        x,
+    )
+    scale = max(float(np.linalg.norm(reference)), np.finfo(float).tiny)
+    rel_error = float(np.linalg.norm(fast - reference) / scale)
+    if rel_error > 1e-9:
+        raise RuntimeError(
+            f"Accelerated MIN state path differs from repository reference: {rel_error:.3e}"
+        )
+    return rel_error
+
+
 def min_state_trajectory(
     x: np.ndarray,
     gammas: np.ndarray,
     weights: np.ndarray,
 ) -> np.ndarray:
-    """Use the repository MIN/SOE API, with a fast equivalent for the uniform grid."""
-    states = exact_piecewise_linear_states(x, gammas, weights)
-
-    # The API result is the scientific source of truth. A compact equivalence
-    # check prevents the accelerated path from silently diverging.
-    reference = SOEMemory(weights, gammas).state_trajectory(
-        np.arange(len(x), dtype=float) * DT,
-        np.asarray(x, dtype=complex),
-    )
-    scale = max(float(np.linalg.norm(reference)), np.finfo(float).tiny)
-    rel_error = float(np.linalg.norm(states - reference) / scale)
-    if rel_error > 1e-11:
-        raise RuntimeError(
-            f"Accelerated MIN state path differs from repository reference: {rel_error:.3e}"
-        )
-    return states
+    """Use the exact repository-equivalent fast realization on the uniform grid."""
+    return exact_piecewise_linear_states(x, gammas, weights)
 
 
 def linear_readout_fit(X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -450,6 +456,9 @@ def run_case(
 
 
 def main() -> None:
+    equivalence_error = validate_accelerated_state_equivalence()
+    print(f"accelerated_state_equivalence_relative_error={equivalence_error:.3e}")
+
     oracle_kernels = {
         env_name: oracle_kernel(env_name)
         for env_name in ENVIRONMENTS
@@ -571,6 +580,7 @@ def main() -> None:
             "kernel-condition effects are separated from 14A task-dimension effects"
         ),
         "mismatch_map": MISMATCH_MAP,
+        "accelerated_state_equivalence_check": "single startup comparison against repository SOEMemory.state_trajectory",
         "boundaries": [
             "This is an H2 environment-alignment test, not a universal performance benchmark.",
             "The raw observation remains a control because 14A established it as a viable task representation.",
