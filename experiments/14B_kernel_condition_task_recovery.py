@@ -420,6 +420,8 @@ def run_case(
                 np.linalg.norm(weights - oracle_weights)
                 / max(np.linalg.norm(oracle_weights), np.finfo(float).tiny)
             ),
+            "estimation_kernel_fit_relative_l2": float("nan"),
+            "estimation_covariance_relative_l2": float("nan"),
         }
         common.update(kernel_descriptors(gammas, weights))
         common.update(geom)
