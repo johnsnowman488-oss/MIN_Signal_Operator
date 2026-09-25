@@ -267,8 +267,8 @@ def run_case(signal_name: str, generator, environment: str, snr_db: float, seed:
     d_task = task_dimension(full_nmse, curve)
 
     # Raw observation linear-readout control at symbol centers.
-    raw_train = x_train.reshape(NUM_TRAIN_SYMBOLS, SPS)[:, SPS // 2]
-    raw_test = x_test.reshape(NUM_TEST_SYMBOLS, SPS)[:, SPS // 2]
+    raw_train = y_train.reshape(NUM_TRAIN_SYMBOLS, SPS)[:, SPS // 2]
+    raw_test = y_test.reshape(NUM_TEST_SYMBOLS, SPS)[:, SPS // 2]
     raw_beta = linear_readout_fit(raw_train[:, None], train.symbols)
     raw_nmse = nmse(test.symbols, linear_readout_predict(raw_test[:, None], raw_beta))
 
