@@ -438,7 +438,6 @@ def run_case(
             "estimation_covariance_relative_l2": float("nan"),
         }
         common.update(kernel_descriptors(gammas, weights))
-        common.update(geom)
         if condition == "estimated":
             common.update(estimate_meta)
 
