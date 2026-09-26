@@ -30,7 +30,7 @@ and evaluated on held-out centers after PCA projection to:
 
 Each retained dimension is decoded with ridge strengths:
 
-    λ = 0, 10^-8, 10^-6, 10^-4, 10^-2, 10^-1.
+    λ = 0, 10^-10, 10^-8, 10^-6, 10^-4, 10^-2, 10^-1.
 
 The ridge penalty is normalized by the mean diagonal scale of the augmented
 training Gram matrix, while the intercept is not regularized. This makes the
