@@ -45,8 +45,7 @@ def ridge_fit(X: np.ndarray, y: np.ndarray, lam: float) -> tuple[np.ndarray, flo
     alpha = float(lam) * scale
     reg = np.eye(gram.shape[0], dtype=complex)
     reg[0, 0] = 0.0
-    beta = np.linalg.solve(gram + alpha * reg, design.conj().T @ y)
-    return beta, alpha
+    if lam == 0.0:\n        # Use SVD least squares for the true unregularized baseline; a direct\n        # Gram solve is unstable for the highly redundant clustered states.\n        return np.linalg.lstsq(design, y, rcond=None)[0], 0.0\n    beta = np.linalg.solve(gram + alpha * reg, design.conj().T @ y)\n    return beta, alpha
 
 
 def predict(X: np.ndarray, beta: np.ndarray) -> np.ndarray:
