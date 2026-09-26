@@ -1,0 +1,42 @@
+name: Experiment 14D
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "experiments/14D_readout_stability.py"
+      - "tests/test_experiment_14d.py"
+      - ".github/workflows/experiment-14d.yml"
+      - "experiments/14C_geometry_to_task.py"
+      - "min/**"
+      - "pyproject.toml"
+  push:
+    paths:
+      - "experiments/14D_readout_stability.py"
+      - "tests/test_experiment_14d.py"
+      - ".github/workflows/experiment-14d.yml"
+      - "experiments/14C_geometry_to_task.py"
+      - "min/**"
+      - "pyproject.toml"
+
+jobs:
+  run-14d:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install research dependencies
+        run: pip install -e ".[research,test]"
+      - name: Run targeted 14D tests
+        run: pytest -q tests/test_experiment_14d.py tests/test_experiment_14c.py tests/test_soe_memory_state.py
+      - name: Run Experiment 14D
+        run: python experiments/14D_readout_stability.py
+      - name: Upload 14D results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-14d-results
+          path: experiments/results/14D_readout_stability_*
