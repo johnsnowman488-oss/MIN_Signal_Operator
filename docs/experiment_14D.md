@@ -84,6 +84,55 @@ giving 32,400 full-state readout rows, plus 900 scalar-MIN rows.
 The held-out target symbols are never used to fit the kernel, PCA basis, or
 readout.
 
+## Executed result
+
+The authoritative final pull-request execution completed successfully:
+
+- Experiment 14D workflow: 36221260040
+- repository CI: 36221260105
+- full test workflow: 36221260128
+- final experiment head: 2a0aabe245019bf40a2c52602cc2f9bfe05a3d6d
+- result artifact: experiment-14d-results
+- artifact SHA-256: 13ae89d2296144c452e6729fea326ac161d26ccb2b3f18f11f963731880dc79e
+
+The run generated 300 underlying task cases, 37,800 full-state readout
+rows, and 900 scalar-MIN rows. Repository-state equivalence remained
+1.61e-11 relative error.
+
+At full dimension d=16, mean held-out NMSE across all task cases was:
+
+| Geometry | λ=0 | Best tested λ |
+|---|---:|---:|
+| clustered | 0.6918 | 0.6918 at λ=0 |
+| logspread | 0.7252 | 0.5321 at λ=10^-10 |
+| wide | 1.9091 | 0.3230 at λ=10^-6 |
+
+The best regularization scale is geometry- and condition-dependent rather than
+uniform. For d=16, the best tested λ by SNR was:
+
+- clustered: λ=0 at 0, 10, 20 and 30 dB;
+- logspread: λ=10^-10 at 0, 10 and 20 dB, λ=0 at 30 dB;
+- wide: λ=10^-6 at 0 and 10 dB, λ=10^-10 at 20 and 30 dB.
+
+The augmented full-state readout condition number differed sharply by geometry:
+approximately 1.42e15 for clustered, 8.82e9 for logspread, and 6.53e6 for
+wide. Under the κ>10^12 diagnostic threshold, all clustered cases were flagged
+while the logspread and wide cases were not.
+
+The scalar-MIN secondary path remained comparatively insensitive to geometry:
+mean NMSE was approximately 0.9669, 0.9794 and 0.9990 for clustered,
+logspread and wide respectively.
+
+These results support the intended 14D interpretation: downstream numerical
+accessibility is a substantial part of the observed geometry/task interaction,
+especially for the highly redundant clustered state. At the same time,
+regularization does not collapse all geometry differences into a common curve;
+logspread and wide retain different dimension/regularization behavior.
+
+The λ values above are **relative ridge strengths** normalized by the training
+Gram scale. Therefore the λ=10^-10 entry is a near-zero normalized regularizer,
+not a claim of numerical identity with 14C's absolute 10^-10 Gram penalty.
+
 ## Relation to the program
 
 13A: controlled kernel geometries.
