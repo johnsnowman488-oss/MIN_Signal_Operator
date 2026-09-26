@@ -77,7 +77,7 @@ There are:
 - 300 underlying task cases;
 - 3 geometries;
 - 6 retained dimensions;
-- 6 ridge strengths;
+- 7 ridge strengths;
 
 giving 32,400 full-state readout rows, plus 900 scalar-MIN rows.
 
