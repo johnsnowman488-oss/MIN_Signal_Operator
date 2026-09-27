@@ -1,140 +1,281 @@
 # MIN Signal Operator
 
-A research laboratory for the Memory-Integrated Network (MIN) signal operator.
+A research laboratory for the **Memory-Integrated Network (MIN) signal operator**: a structured causal temporal-memory representation built from finite sums of exponential memory modes.
 
-## Scope
+The project investigates a deliberately open question:
 
-This repository begins with a transparent reference implementation of the causal memory operator
+> **When does structured temporal memory provide a useful representation of an information-bearing signal, and how does the geometry of that memory affect what can be recovered or learned from the resulting state?**
+
+The repository is experimental research software. It does **not** assume that MIN is superior to conventional filters, finite history, state-space models, or learned temporal representations. Advantages must emerge from controlled comparisons.
+
+## Core operator
+
+The continuous causal MIN operator is
 
 $$
-(Mf)(t)=\\int_0^t K(t-s)f(s)\\,ds.
+(Mf)(t)=\int_0^t K(t-s)f(s)\,ds.
 $$
 
-The initial implementation is deliberately small. It is intended for verification and experiments, not production performance.
+A finite sum-of-exponentials (SOE) kernel,
+
+$$
+K(\tau)=\sum_{j=1}^{L} w_j e^{-\gamma_j\tau},
+$$
+
+gives a finite recursive memory state. In discrete time, the representation can be viewed schematically as
+
+$$
+x_{0:t}\longrightarrow q_t,
+$$
+
+where the state geometry depends not only on the nominal number of modes $L$, but also on decay-rate placement, weights, signal excitation, observation conditions, and the task.
+
+The current research therefore treats MIN primarily as a **structured temporal representation operator**, rather than simply as another filter.
 
 ## Research progression
 
-The program is now organized around a central question:
+The experiments have evolved through several distinct questions:
 
-> **What does the MIN memory transformation do to an information-bearing signal, how recoverable is that transformation, and when—if ever—does deliberately introducing such memory become useful?**
+1. **Operator verification** — verify the causal memory operator numerically.
+2. **SOE realization** — connect convolutional memory to finite recursive states.
+3. **Kernel identification** — compare Prony, Matrix Pencil, ESPRIT, Vector Fitting, and positive NNLS representations.
+4. **Signal atlas** — measure how different kernels transform elementary and digital signals.
+5. **Frequency and finite-horizon analysis** — separate genuine memory effects from discretization, startup, and truncation effects.
+6. **Communication transformation and recovery** — test BPSK/QPSK/16-QAM under controlled memory, AWGN, multipath, and receiver models.
+7. **Receiver recoverability** — compare FIR, IIR/state-space, SOE/MIN-aware, and explicit SOE-state inversion paths.
+8. **Conditioning and regularization** — distinguish forward representation from inverse stability.
+9. **Kernel/SOE geometry atlas** — vary mode count, decay-rate geometry, and weights under controlled excitation.
+10. **State geometry** — measure how kernel geometry becomes realized temporal state geometry.
+11. **Environment-conditioned kernels** — map controlled temporal environments to SOE kernels and test finite-observation estimation and mismatch.
+12. **Task-level evaluation** — ask whether representation geometry changes task accessibility.
+13. **Predictive representation** — test whether MIN states expose temporal information unavailable to instantaneous observations.
+14. **Next stage: task-matched memory design** — compare fixed, task-matched, and learned memory geometries against finite-history and standard state-space baselines under approximately matched computational budgets.
 
-The roadmap therefore separates **forward transformation**, **propagation**, **receiver recoverability**, and **computational complexity**. It does not assume that MIN preserves signals or improves communication.
+The project intentionally separates:
 
-1. **Core operator verification** — verify the causal memory operator and basic numerical behavior.
-2. **Kernel and spectral foundation** — characterize exponential, multi-scale, and algebraic-tail kernels and their frequency response.
-3. **SOE/state realization** — represent memory kernels with finite recursive states and validate the continuous-to-discrete relationship.
-4. **Kernel identification** — compare Prony, Matrix Pencil, ESPRIT, Vector Fitting, and NNLS while tracking positivity/stability structure.
-5. **Synthetic signal atlas** — measure how MIN transforms elementary waveforms.
-6. **Frequency and finite-horizon analysis** — distinguish startup/finite-history effects from genuine long-memory behavior.
-7. **Digital communication transformation** — establish BPSK/QPSK/16-QAM distortion under controlled MIN memory.
-8. **AWGN receiver compensation** — test whether conventional receiver memory can undo the transformation on held-out symbols.
-9. **Multipath/fading separation** — separate ordinary propagation distortion from MIN-induced memory.
-10. **Receiver recoverability ladder** — compare raw, finite FIR, longer FIR, IIR/state-space, SOE, and MIN-aware receivers using identical channel/data realizations. Experiment 12A is the generic-complexity baseline; Experiment 12B tests explicit SOE/MIN structure; Experiment 12C tests explicit SOE state/input inversion.
-11. **Matched-complexity study** — compare parameter count, state dimension, latency/memory horizon, MACs/sample, training cost, BER, EVM, and held-out residual rather than declaring a universal winner.
-12. **Forward preservation study** — explicitly measure waveform preservation through propagation, rather than inferring preservation from receiver BER.
-13. **Transform-domain stability study** — test whether a deliberately MIN-transformed representation is more stable under specified propagation disturbances.
-14. **Nonlinear-memory extension** — only after a controlled nonlinear channel is introduced, add memory-polynomial and Volterra baselines and compare them with an explicitly nonlinear MIN extension.
-15. **Robustness and identifiability** — vary memory horizon, kernel family, SNR, fading/multipath realization, training length, and model mismatch; determine when the transformation is identifiable and invertible in practice.
-16. **Real IQ validation** — move to recorded IQ only after the synthetic mechanism and complexity trade-offs are reproducible.
-17. **SDR experiment** — test a constrained real-time implementation after the signal/receiver hypotheses survive offline validation.
-18. **Performance engineering** — optimize Python/C++/streaming implementations only after experiments identify a justified computational bottleneck.
+$$
+\text{environment}
+\rightarrow
+K_{env}(t)
+\rightarrow
+\{\gamma_j,w_j\}
+\rightarrow
+\text{MIN state geometry}
+\rightarrow
+\text{task accessibility}
+\rightarrow
+\text{task performance}.
+$$
 
-### Interpretation ladder
+The purpose is to determine whether this chain can become a reproducible design principle rather than a post-hoc interpretation.
 
-The research should distinguish four increasingly strong conclusions:
+## What has been established so far
 
-[
-\\boxed{
-\\text{MIN transforms signals}
-;
-\\notRightarrow;
-\\text{MIN preserves signals}
-;
-\\notRightarrow;
-\\text{MIN is efficiently invertible}
-;
-\\notRightarrow;
-\\text{MIN improves propagation}
-}
-]
+### 1. MIN/SOE numerical foundation
 
-A positive result at each stage must therefore be demonstrated independently.
+Experiments 01–05 establish the numerical operator, finite-SOE realization, non-exponential stress testing, positive NNLS approximation, and comparisons among standard SOE identification methods.
 
-### Current stage
+A key methodological point is that identification failure can result from model mismatch or poor conditioning without invalidating the underlying memory operator.
 
-Experiments 01–11 establish the numerical/operator foundation, kernel identification, signal atlas, spectral/finite-horizon behavior, digital-signal distortion, AWGN compensation, and controlled multipath/fading receiver behavior.
+### 2. Memory changes signals nontrivially
 
-The current evidence supports the narrower statement that **the tested MIN kernels impose temporal memory structures that are not fully captured by short symbol-spaced FIR equalizers**. Experiment 12A further shows that simply increasing generic linear receiver complexity does not systematically remove the residual. Experiment 12B tests explicit SOE/MIN structure and, in its initial matched sampled realization, does not show a recovery advantage over the generic FIR/IIR baselines. Experiment 12C then tests an explicit SOE state realization followed by direct, unregularized causal inversion: the matched noiseless realization is accurate, but the direct inverse becomes poorly conditioned under noise and channel estimation. This is a statement about a particular recovery path, not a verdict on MIN as a transformation. These experiments do not establish irreversibility, signal preservation, communication advantage, or propagation advantage.
+Experiments 06–11 establish that MIN memory produces measurable temporal transformation, frequency-dependent behavior, finite-horizon effects, and substantial intersymbol mixing in the tested digital-signal settings.
 
-The receiver-recoverability branch through Experiment 12D is now closed for its current controlled scope. The immediate research target is the forward representation question:
+The communication experiments do **not** establish a communication advantage for MIN. They provide controlled conditions for studying transformation and recoverability.
 
-[
-\\boxed{
-\\text{kernel geometry}
-\\rightarrow
-\\text{MIN transform}
-\\rightarrow
-\\text{temporal state/feature representation}
-\\rightarrow
-\\text{task utility}
-}
-]
+### 3. Forward representation is different from inversion
 
-Experiment 13A-1 begins this branch with a controlled Kernel-SOE Geometry Atlas.
+Experiments 12A–12D show that:
 
-Experiments 13B and 13C-1 through 13C-3 extend this branch from kernel geometry to realized temporal state geometry and environment-derived kernel construction. 13C-1 establishes the oracle environment → kernel mapping; 13C-2 measures finite-observation uncertainty; 13C-3 tests SOE rate-support and model-order mismatch. A consolidated research notebook, `notebooks/13C_environment_kernel_temporal_representation.ipynb`, consumes the three CSV result sets, generates the relevant plots, and can regenerate the CSV artifacts through the existing experiment scripts. It varies SOE mode count, decay-rate geometry, and positive weights without channels, noise, receivers, or downstream task models. The purpose is to characterize representation geometry before asking whether any representation is useful for prediction, classification, detection, propagation, or control.
+- generic receiver complexity does not automatically remove long-memory residuals;
+- explicitly supplying SOE/MIN structure does not automatically improve recovery;
+- a matched noiseless SOE state can represent/invert the tested system to numerical precision;
+- direct inversion can nevertheless become severely ill-conditioned under noise and channel-estimation error;
+- regularization changes the practical inverse problem.
 
-### Baseline policy
+This motivates a separation between:
 
-The present MIN operator is linear. Therefore the primary receiver comparison is:
+$$
+\text{forward representation}
+\neq
+\text{inverse stability}
+\neq
+\text{task utility}.
+$$
 
-[
-\\text{FIR}
-\\rightarrow
-\\text{IIR/state-space}
-\\rightarrow
-\\text{SOE/MIN-aware receiver}.
-]
+### 4. Memory geometry is an independent representation variable
 
-Volterra and memory-polynomial models are deferred until a nonlinear-memory condition exists. Introducing them earlier would compare a nonlinear model class against a linear MIN condition without a matched task.
+Experiments 13A–13C establish a more general representation branch.
 
-The project deliberately keeps **continuous MIN**, its **sampled/discrete realization**, and the **communication channel** as separate layers.
+The central hierarchy is
+
+$$
+L \neq D_{eff} \neq D_{basis} \neq D_{state},
+$$
+
+and later experiments add task-accessible dimension as another distinct quantity.
+
+Experiment 13B found a strong relationship between finite-horizon SOE basis participation and signal-driven state participation in the tested setting (Pearson $r\approx0.966$), while $D_{eff}$ was not interchangeable with realized state dimension.
+
+Experiment 13C extends this to an environment-conditioned construction:
+
+$$
+\text{environment}
+\rightarrow
+K_{env}
+\rightarrow
+\text{SOE geometry}
+\rightarrow
+\text{MIN state}.
+$$
+
+Finite-observation uncertainty, rate-support mismatch, and model-order mismatch are explicitly tested rather than hidden behind an oracle kernel.
+
+### 5. Same model order does not imply the same task representation
+
+Experiment 14C is one of the strongest current results.
+
+With mode count, weights, effective dimension, observed waveform, task, decoder, and evaluation protocol held fixed, changing only SOE decay-rate geometry produced materially different state/task representations.
+
+Representative results:
+
+| Geometry | Full-state NMSE | Task dimension |
+|---|---:|---:|
+| Clustered | 0.8574 | 2.04 |
+| Logspread | 0.5003 | 10.20 |
+| Wide | 0.7156 | 11.70 |
+
+These numbers are specific to the controlled experiment. They are **not** a universal ranking of memory geometries.
+
+The important result is the independence of memory geometry from nominal mode count and effective count: **where the memory time scales are placed can change the information made accessible to a downstream task.**
+
+Experiment 14D shows that decoder conditioning is strongly geometry-dependent as well, so representation and numerical conditioning must be analyzed together.
+
+### 6. Negative results are part of the program
+
+Experiment 14A showed that an environment-informed MIN representation did not automatically outperform the raw noisy observation baseline. Experiment 14B showed that environment/kernel alignment does not automatically produce task-optimal representations. Experiment 14E found no general predictive advantage in the tested IID digital-symbol setting.
+
+These results prevent the project from turning a representation hypothesis into an assumed performance claim.
+
+### 7. MIN can expose hidden predictive information
+
+Experiment 14F uses a genuine hidden-memory process in which the scalar observation is temporally dependent while the underlying hidden state evolves Markovianly.
+
+Representative held-out prediction results were:
+
+| Representation | NMSE |
+|---|---:|
+| Current observation | 0.1639 |
+| Best MIN representation | 0.1101 |
+| Best finite history | 0.0543 |
+| Oracle hidden state | 0.0182 |
+
+The result supports a narrower claim: **a causal MIN state can expose predictive information that is not available from the instantaneous observation alone.**
+
+It does **not** show that MIN is better than finite history in general; in this controlled process, finite history performed better.
+
+## Current scientific thesis
+
+The strongest current interpretation is:
+
+> **Temporal memory geometry is an independently meaningful representation variable. It is not determined by nominal SOE mode count or effective dimension alone, and changes in memory geometry can propagate into realized state geometry and task accessibility.**
+
+A second supporting observation is:
+
+> **Causal memory states can recover predictive information hidden by instantaneous observations, although conventional finite history can remain more effective in the tested regimes.**
+
+Together these suggest a research direction in which memory kernels are designed as **representation mechanisms**, not merely as signal transformations.
+
+## Current research question
+
+The next decisive question is:
+
+> **Can useful memory geometry be predicted or designed from the temporal structure of a task, and can it provide a better representation-per-compute trade-off than conventional finite history or standard state-space baselines?**
+
+The next benchmark should therefore compare, under approximately matched budgets:
+
+- fixed arbitrary SOE geometry;
+- environment-matched geometry;
+- task-matched geometry;
+- learned memory geometry;
+- finite-history/FIR representations;
+- standard state-space or recurrent baselines.
+
+Relevant measurements include:
+
+- task/prediction error;
+- retained state dimension;
+- effective memory horizon;
+- parameter count;
+- MACs per sample;
+- latency;
+- training cost;
+- robustness to kernel mismatch;
+- robustness to observation noise and sampling changes.
+
+Only if these experiments produce reproducible advantages should the project claim an engineering contribution to signal processing.
+
+## Baseline policy
+
+The primary MIN condition is linear, so linear baselines remain central:
+
+$$
+\text{raw/current observation}
+\rightarrow
+\text{finite history/FIR}
+\rightarrow
+\text{IIR/state-space}
+\rightarrow
+\text{SOE/MIN}.
+$$
+
+Learned temporal models may be added where the task requires them.
+
+Volterra and memory-polynomial baselines are reserved for controlled nonlinear-memory conditions rather than being introduced simply to enlarge the benchmark.
+
+All comparisons should preserve, where practical, matched signal realizations, train/test splits, computational budgets, and evaluation protocols.
 
 ## Repository structure
 
-- min/ — core implementation, kernels, synthetic signals, and metrics
-- tests/ — numerical correctness tests
-- notebooks/ — executable research experiments
-- experiments/ — reproducible benchmark runners and recorded result artifacts
-- docs/ — theory-to-experiment research protocol
-- cpp/ — future performance implementations
+- **min/** — core implementation, kernels, synthetic signals, and metrics
+- **tests/** — numerical correctness tests
+- **notebooks/** — executable experiment and synthesis notebooks
+- **experiments/** — reproducible benchmark runners and result artifacts
+- **docs/** — research protocols and experiment documentation
+- **cpp/** — future performance-oriented implementations
+
+The notebooks are **not** the numerical source of truth. Reusable logic belongs in **min/**, experiment scripts generate the result tables, and notebooks synthesize or visualize those results.
 
 ## Development
 
-The reference implementation uses NumPy. Install the project with your preferred Python environment, then run the test suite with:
+The reference implementation uses NumPy.
 
-```bash
-pytest
-```
+Install the project and research dependencies with:
 
-The frequency-response experiment uses SciPy's weighted oscillatory quadrature for the long-memory power-law reference. Install the research dependencies with:
+    pip install -e ".[research]"
 
-```bash
-pip install -e ".[research]"
-```
+Run the test suite with:
 
-The notebooks are experiments rather than the source of truth; reusable logic belongs in min/ and tests should accompany numerical claims.
+    pytest
+
+Experiments should remain reproducible and should record the assumptions, baselines, seeds, and evaluation protocol needed to interpret their results.
+
+## Research status
+
+**Active research — representation/task branch.**
+
+Experiments 01–12D establish the numerical, SOE, signal-transformation, receiver-recoverability, and conditioning foundations.
+
+Experiments 13A–13C establish the kernel-geometry, state-geometry, and environment-conditioned representation branch.
+
+Experiments 14A–14F move into controlled task-level evidence, including raw-observation controls, environment/kernel alignment, memory geometry, regularization, predictive testing, and hidden-memory prediction.
+
+The current evidence supports a **structured temporal representation** interpretation of MIN. It does not yet establish universal superiority over FIR/IIR/state-space methods, finite history, learned temporal models, or other signal-processing technologies.
+
+The project therefore remains deliberately empirical: **claims about usefulness must be earned by controlled experiments.**
 
 ## License
 
-The MIN Signal Operator software and associated source code are released under the **GNU General Public License v3.0 only (GPL-3.0-only)**. See the [LICENSE](LICENSE) file for the complete license text.
+The MIN Signal Operator software and associated source code are released under the **GNU General Public License v3.0 only (GPL-3.0-only)**. See [LICENSE](LICENSE) for the complete license text.
 
-The GPL designation applies to project code covered by this repository's copyright. Third-party dependencies, datasets, documents, and other externally sourced materials remain subject to their respective licenses or terms.
-
-## Status
-
-Early research laboratory. Experiments 01–05 establish the numerical MIN/SOE and identification foundation. Experiment 06 begins the synthetic signal atlas. Experiment 07 characterizes frequency response and explicitly separates operator discretization from finite-history effects. Experiment 08 measures the horizon required for short-memory and algebraic-tail kernels to approach their infinite-horizon response. Experiment 09 establishes that the tested memory transformations produce substantial temporal distortion in sampled digital signals. Experiment 10 tests whether that distortion is compensable by a receiver using controlled AWGN and held-out FIR equalization. Experiment 11 adds normalized flat Rayleigh and 3-tap multipath channels. Experiment 12A expands the receiver ladder to FIR-7/15/31 and IIR-2/4/8. Experiment 12B adds an SOE/MIN-structured receiver whose denominator is derived from the sampled SOE realization. The executed 12B run contains 1,800 rows across two SOE memories, three signal families, three channels, four SNRs, five seeds, and five receiver variants; the workflow completed with the test suite passing. The current result is that the SOE-aware receiver remains compact but does not outperform the generic baselines in held-out EVM/BER. These observations do not establish a communication advantage for MIN.
-
-Experiment 13A-1 has been executed successfully with 675 rows. Its first result is that increasing SOE mode count does not automatically create independent temporal dimensions: closely clustered decay rates become highly redundant, while widely separated rates produce somewhat higher but still modest effective dimensions for the tested digital signals. These are representation measurements, not evidence of task advantage.
-
-Experiment 13B has now completed with 675 controlled cases. Its strongest bridge is between finite-horizon SOE basis participation and signal-driven MIN state participation (Pearson r = 0.966; Spearman rho = 0.967). M_scale also correlates strongly with realized state geometry, while D_eff is not interchangeable with D_state. The resulting hierarchy is L != D_eff != D_basis != D_state. Experiment 13C-1 now begins the upstream environment-conditioned branch: controlled environment covariance geometries are mapped to positive SOE kernels with a fixed NNLS dictionary, then propagated through GFE/GGFE, basis, and state geometry without a downstream task.
+Third-party dependencies, datasets, documents, and externally sourced materials remain subject to their respective licenses or terms.
