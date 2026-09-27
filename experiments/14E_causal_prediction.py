@@ -158,6 +158,7 @@ def run_case(signal_name, generator, environment, snr_db, seed):
                     "nmse_delta_vs_raw": value - raw_nmse,
                     "pca_explained_energy": mod.pca_energy(singular, d),
                     "representation": "full_state",
+                    "d_task_10pct": None,
                     **cond,
                     **mod.KERNEL_DESCRIPTORS[geometry],
                 })
