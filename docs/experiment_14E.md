@@ -118,3 +118,52 @@ experiment remains comparable to 14C/14D.
 14D: decoder accessibility and conditioning.
 
 14E: causal future-observation prediction from the memory representation.
+
+
+## Executed result
+
+The authoritative final CI execution completed successfully:
+
+- Experiment 14E workflow: 36306039350
+- final experiment head: fcb58932e7081f0d1f6ccc54ea0ac5ad697bba9e
+- result artifact: experiment-14e-results (artifact ID 10926978955)
+- artifact SHA-256: 1cb0bfc6830cb640b265668e468ef30f6145bf492c310c5cdf229225c96eb267
+- rows: 18,900 (16,200 full-state and 2,700 scalar-MIN)
+- targeted/regression tests: 9 passed before the numerical sweep
+
+The current-observation baseline has mean next-observation NMSE 0.9605 across
+the 300 task cases.
+
+At d=16 and lambda=10^-6, the full-state predictive NMSE was:
+
+| Geometry | Mean | Median | Std. |
+|---|---:|---:|---:|
+| clustered | 0.9505 | 1.0028 | 0.1267 |
+| logspread | 0.9885 | 1.0194 | 0.1655 |
+| wide | 1.2845 | 1.1239 | 0.4854 |
+
+Relative to the same raw baseline, the mean paired change at d=16,
+lambda=10^-6 was approximately -0.0100 for clustered, +0.0281 for
+logspread, and +0.3240 for wide. Clustered therefore gives only a modest
+aggregate improvement, while the other two geometries do not improve the
+simple current-observation predictor.
+
+The predictive task dimension under the 10% criterion had means of
+approximately 1.05, 1.30, and 1.16 for clustered, logspread, and wide,
+respectively. These values are operational task dimensions, not physical
+state dimensions.
+
+The scalar-MIN path gave mean NMSE approximately 0.9559, 0.9674, and 0.9925
+for clustered, logspread, and wide respectively.
+
+These results constrain the interpretation of the MIN state. In this
+controlled IID-symbol setting, the state does not provide a broad predictive
+advantage over the current noisy observation. The small clustered improvement
+is evidence that the memory representation can expose a limited amount of
+predictable temporal structure, but the geometry dependence and the absence of
+a consistent gain mean that 14E does not establish a general predictive
+superiority of MIN.
+
+A stronger temporal-memory test should therefore move to 14F with a
+controlled process whose future is genuinely dependent on past state, rather
+than relying on IID communication symbols.
