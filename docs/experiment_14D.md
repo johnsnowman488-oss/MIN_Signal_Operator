@@ -79,7 +79,7 @@ There are:
 - 6 retained dimensions;
 - 7 ridge strengths;
 
-giving 32,400 full-state readout rows, plus 900 scalar-MIN rows.
+giving 37,800 full-state readout rows, plus 900 scalar-MIN rows.
 
 The held-out target symbols are never used to fit the kernel, PCA basis, or
 readout.
@@ -88,16 +88,15 @@ readout.
 
 The authoritative final pull-request execution completed successfully:
 
-- Experiment 14D workflow: 36221260040
-- repository CI: 36221260105
-- full test workflow: 36221260128
-- final experiment head: 2a0aabe245019bf40a2c52602cc2f9bfe05a3d6d
-- result artifact: experiment-14d-results
-- artifact SHA-256: 13ae89d2296144c452e6729fea326ac161d26ccb2b3f18f11f963731880dc79e
+- Experiment 14D workflow: 36221414451 (run #12, completed successfully)
+- final experiment head: 3932e88bc2eb9ed97cc67a6fd7f6a1506994d3e3
+- result artifact: experiment-14d-results (artifact ID 10899102617)
+- artifact SHA-256: 50a7569764843e2b8848b038077843010d544d03730f17a7d5e50dd671de6950
 
-The run generated 300 underlying task cases, 37,800 full-state readout
+The authoritative run generated 300 underlying task cases, 37,800 full-state readout
 rows, and 900 scalar-MIN rows. Repository-state equivalence remained
-1.61e-11 relative error.
+1.61e-11 relative error. The artifact was produced from the same commit that
+contains the final 14D least-squares, result-schema, and regularization fixes.
 
 At full dimension d=16, mean held-out NMSE across all task cases was:
 
