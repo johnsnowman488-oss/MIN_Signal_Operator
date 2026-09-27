@@ -142,7 +142,7 @@ def build_prediction_pairs(
     return observed[centers], clean[centers + 1], centers
 
 
-def run_case(source_geometry: str, min_geometry: str, snr_db: float, seed: int):
+def run_case(source_geometry: str, min_geometry: str, snr_db: float, seed: int, include_shared_baselines: bool = True):
     clean_train, hidden_train = generate_hidden_process(
         source_geometry, NUM_TRAIN_SAMPLES, seed
     )
@@ -167,20 +167,22 @@ def run_case(source_geometry: str, min_geometry: str, snr_db: float, seed: int):
     )
     raw_nmse = nmse(test_target, predict(test_x[:, None], raw_beta))
 
-    # Explicit finite-history baselines.
+    # Explicit finite-history baselines are shared across MIN geometries for
+    # a fixed source/SNR/seed because they use the identical noisy observation.
     history_results = {}
-    for history in HISTORY_LENGTHS:
-        hx_train, tidx_train = history_matrix(y_train, history, WARMUP)
-        hx_test, tidx_test = history_matrix(y_test, history, WARMUP)
-        # Keep target alignment explicit and causal.
-        hy_train = clean_train[tidx_train + 0]
-        hy_test = clean_test[tidx_test + 0]
-        history_results[history] = {}
-        for lam in RIDGE_LAMBDAS:
-            beta, alpha = stable_ridge_fit(hx_train, hy_train, lam)
-            value = nmse(hy_test, predict(hx_test, beta))
-            history_results[history][lam] = value
-            rows.append({
+    if include_shared_baselines:
+        for history in HISTORY_LENGTHS:
+            hx_train, tidx_train = history_matrix(y_train, history, WARMUP)
+            hx_test, tidx_test = history_matrix(y_test, history, WARMUP)
+            # Keep target alignment explicit and causal.
+            hy_train = clean_train[tidx_train]
+            hy_test = clean_test[tidx_test]
+            history_results[history] = {}
+            for lam in RIDGE_LAMBDAS:
+                beta, alpha = stable_ridge_fit(hx_train, hy_train, lam)
+                value = nmse(hy_test, predict(hx_test, beta))
+                history_results[history][lam] = value
+                rows.append({
                 "experiment": "14F_hidden_memory_markovization",
                 "representation": "finite_history",
                 "source_geometry": source_geometry,
@@ -206,22 +208,23 @@ def run_case(source_geometry: str, min_geometry: str, snr_db: float, seed: int):
         oracle_input_train, oracle_target_train, 1e-6
     )
     oracle_nmse = nmse(oracle_target_test, predict(oracle_input_test, oracle_beta))
-    rows.append({
-        "experiment": "14F_hidden_memory_markovization",
-        "representation": "oracle_hidden_state",
-        "source_geometry": source_geometry,
-        "min_geometry": "",
-        "snr_db": float(snr_db),
-        "seed": int(seed),
-        "retained_dimension": PROCESS_DIMS,
-        "history_length": 0,
-        "ridge_lambda": 1e-6,
-        "ridge_alpha": oracle_alpha,
-        "heldout_next_state_nmse": oracle_nmse,
-        "current_observation_nmse": raw_nmse,
-        "nmse_delta_vs_current": oracle_nmse - raw_nmse,
-        "matched_geometry": 0,
-    })
+    if include_shared_baselines:
+        rows.append({
+            "experiment": "14F_hidden_memory_markovization",
+            "representation": "oracle_hidden_state",
+            "source_geometry": source_geometry,
+            "min_geometry": "",
+            "snr_db": float(snr_db),
+            "seed": int(seed),
+            "retained_dimension": PROCESS_DIMS,
+            "history_length": 0,
+            "ridge_lambda": 1e-6,
+            "ridge_alpha": oracle_alpha,
+            "heldout_next_state_nmse": oracle_nmse,
+            "current_observation_nmse": raw_nmse,
+            "nmse_delta_vs_current": oracle_nmse - raw_nmse,
+            "matched_geometry": 0,
+        })
 
     kernel = mod.KERNELS[min_geometry]
     q_train_all = mod.exact_piecewise_linear_states(
@@ -364,7 +367,10 @@ def main():
         for source_geometry in SOURCE_GEOMETRIES:
             for snr_db in SNR_DB:
                 for min_geometry in MIN_GEOMETRIES:
-                    rows, case = run_case(source_geometry, min_geometry, snr_db, seed)
+                    rows, case = run_case(
+                        source_geometry, min_geometry, snr_db, seed,
+                        include_shared_baselines=(min_geometry == MIN_GEOMETRIES[0]),
+                    )
                     all_rows.extend(rows)
                     cases.append(case)
 
@@ -373,9 +379,9 @@ def main():
     )
     expected_full = expected_cases * len(PCA_DIMENSIONS) * len(RIDGE_LAMBDAS)
     expected_scalar = expected_cases * len(RIDGE_LAMBDAS)
-    history_cases = len(SEEDS) * len(SOURCE_GEOMETRIES) * len(SNR_DB) * 3
-    expected_history = history_cases * len(HISTORY_LENGTHS) * len(RIDGE_LAMBDAS)
-    expected_oracle = history_cases
+    shared_cases = len(SEEDS) * len(SOURCE_GEOMETRIES) * len(SNR_DB)
+    expected_history = shared_cases * len(HISTORY_LENGTHS) * len(RIDGE_LAMBDAS)
+    expected_oracle = shared_cases
 
     assert len(cases) == expected_cases
     assert sum(r["representation"] == "full_state" for r in all_rows) == expected_full
