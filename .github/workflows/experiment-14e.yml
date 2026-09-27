@@ -1,0 +1,42 @@
+name: Experiment 14E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "experiments/14E_causal_prediction.py"
+      - "tests/test_experiment_14e.py"
+      - ".github/workflows/experiment-14e.yml"
+      - "experiments/14C_geometry_to_task.py"
+      - "min/**"
+      - "pyproject.toml"
+  push:
+    paths:
+      - "experiments/14E_causal_prediction.py"
+      - "tests/test_experiment_14e.py"
+      - ".github/workflows/experiment-14e.yml"
+      - "experiments/14C_geometry_to_task.py"
+      - "min/**"
+      - "pyproject.toml"
+
+jobs:
+  run-14e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install research dependencies
+        run: pip install -e ".[research,test]"
+      - name: Run targeted 14E and regression tests
+        run: pytest -q tests/test_experiment_14e.py tests/test_experiment_14c.py tests/test_soe_memory_state.py
+      - name: Run Experiment 14E
+        run: python experiments/14E_causal_prediction.py
+      - name: Upload 14E results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-14e-results
+          path: experiments/results/14E_causal_prediction_*
