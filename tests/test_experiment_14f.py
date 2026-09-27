@@ -25,9 +25,9 @@ def test_history_matrix_is_strictly_causal():
     y = np.arange(20, dtype=float)
     X, target_indices = module.history_matrix(y, history=4, start=4)
     assert X.shape[1] == 4
-    assert np.all(X[:, 0] == y[target_indices - 0])
-    assert np.all(X[:, 1] == y[target_indices - 1])
-    assert np.all(target_indices > np.arange(4, 20)[:len(target_indices)] - 1 + 0)
+    assert np.all(X[:, 0] == y[target_indices - 1])
+    assert np.all(X[:, 1] == y[target_indices - 2])
+    assert np.all(target_indices == np.arange(5, 20))
 
 
 def test_future_observations_do_not_change_min_state_at_current_time():
