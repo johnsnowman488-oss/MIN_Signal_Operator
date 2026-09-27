@@ -169,6 +169,16 @@ def run_case(signal_name, generator, environment, snr_db, seed):
             (d for d in PCA_DIMENSIONS if curve[(d, 1e-6)] <= threshold),
             None,
         )
+        for row in rows:
+            if (
+                row["signal"] == signal_name
+                and row["environment"] == environment
+                and row["snr_db"] == float(snr_db)
+                and row["seed"] == int(seed)
+                and row["geometry"] == geometry
+                and row["representation"] == "full_state"
+            ):
+                row["d_task_10pct"] = d_task
 
         z_train = q_train @ kernel["weights"]
         z_test = q_test @ kernel["weights"]
