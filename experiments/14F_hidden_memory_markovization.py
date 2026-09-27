@@ -170,34 +170,34 @@ def run_case(source_geometry: str, min_geometry: str, snr_db: float, seed: int, 
     # Explicit finite-history baselines are shared across MIN geometries for
     # a fixed source/SNR/seed because they use the identical noisy observation.
     history_results = {}
-    if include_shared_baselines:
-        for history in HISTORY_LENGTHS:
-            hx_train, tidx_train = history_matrix(y_train, history, WARMUP)
-            hx_test, tidx_test = history_matrix(y_test, history, WARMUP)
-            # Keep target alignment explicit and causal.
-            hy_train = clean_train[tidx_train]
-            hy_test = clean_test[tidx_test]
-            history_results[history] = {}
-            for lam in RIDGE_LAMBDAS:
-                beta, alpha = stable_ridge_fit(hx_train, hy_train, lam)
-                value = nmse(hy_test, predict(hx_test, beta))
-                history_results[history][lam] = value
+    for history in HISTORY_LENGTHS:
+        hx_train, tidx_train = history_matrix(y_train, history, WARMUP)
+        hx_test, tidx_test = history_matrix(y_test, history, WARMUP)
+        # Keep target alignment explicit and causal: y_n -> x_{n+1}.
+        hy_train = clean_train[tidx_train]
+        hy_test = clean_test[tidx_test]
+        history_results[history] = {}
+        for lam in RIDGE_LAMBDAS:
+            beta, alpha = stable_ridge_fit(hx_train, hy_train, lam)
+            value = nmse(hy_test, predict(hx_test, beta))
+            history_results[history][lam] = value
+            if include_shared_baselines:
                 rows.append({
-                "experiment": "14F_hidden_memory_markovization",
-                "representation": "finite_history",
-                "source_geometry": source_geometry,
-                "min_geometry": "",
-                "snr_db": float(snr_db),
-                "seed": int(seed),
-                "retained_dimension": int(history),
-                "history_length": int(history),
-                "ridge_lambda": float(lam),
-                "ridge_alpha": float(alpha),
-                "heldout_next_state_nmse": value,
-                "current_observation_nmse": raw_nmse,
-                "nmse_delta_vs_current": value - raw_nmse,
-                "matched_geometry": 0,
-            })
+                    "experiment": "14F_hidden_memory_markovization",
+                    "representation": "finite_history",
+                    "source_geometry": source_geometry,
+                    "min_geometry": "",
+                    "snr_db": float(snr_db),
+                    "seed": int(seed),
+                    "retained_dimension": int(history),
+                    "history_length": int(history),
+                    "ridge_lambda": float(lam),
+                    "ridge_alpha": float(alpha),
+                    "heldout_next_state_nmse": value,
+                    "current_observation_nmse": raw_nmse,
+                    "nmse_delta_vs_current": value - raw_nmse,
+                    "matched_geometry": 0,
+                })
 
     # Oracle: true hidden Markov state at n predicts the clean output at n+1.
     oracle_input_train = hidden_train[centers_train]
