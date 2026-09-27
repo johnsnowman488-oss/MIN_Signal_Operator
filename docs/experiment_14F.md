@@ -110,9 +110,9 @@ There are 60 source/SNR/seed cases and 3 MIN geometries, giving:
 - 180 source × MIN cases;
 - 2,700 full-state MIN rows;
 - 540 scalar-MIN rows;
-- 2,160 finite-history rows;
-- 180 oracle rows;
-- 5,580 total rows.
+- 720 finite-history rows (shared across MIN geometries);
+- 60 oracle rows (shared across MIN geometries);
+- 4,020 total rows.
 
 ## Interpretation
 
