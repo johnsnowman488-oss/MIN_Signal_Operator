@@ -1,0 +1,42 @@
+name: Experiment 15A
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15A_geometry_task_generalization.py"
+      - "tests/test_experiment_15a.py"
+      - ".github/workflows/experiment-15a.yml"
+      - "min/**"
+      - "pyproject.toml"
+  push:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15A_geometry_task_generalization.py"
+      - "tests/test_experiment_15a.py"
+      - ".github/workflows/experiment-15a.yml"
+      - "min/**"
+      - "pyproject.toml"
+
+jobs:
+  run-15a:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install research dependencies
+        run: pip install -e ".[research,test]"
+      - name: Run 15A tests
+        run: pytest -q tests/test_experiment_15a.py tests/test_soe_memory_state.py
+      - name: Run Experiment 15A
+        run: python experiments/15A_geometry_task_generalization.py
+      - name: Upload 15A results
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15a-results
+          path: experiments/results/15A_geometry_task_generalization_*
