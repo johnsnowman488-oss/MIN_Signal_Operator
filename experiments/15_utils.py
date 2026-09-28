@@ -215,11 +215,11 @@ def alignment_rate_pattern(process: str, role: str) -> np.ndarray:
     def cluster(center, spread=0.15):
         return center * np.exp(np.linspace(-spread, spread, 8))
     if process == "short":
-        if role == "matched": return cluster(40.0).repeat(2)
-        if role == "displaced": return cluster(4.0).repeat(2)
+        if role == "matched": return 40.0 * np.exp(np.linspace(-0.15, 0.15, MODES))
+        if role == "displaced": return 4.0 * np.exp(np.linspace(-0.15, 0.15, MODES))
         return np.geomspace(0.5, 100.0, MODES)
     if process == "long":
-        if role == "matched": return cluster(2.0).repeat(2)
+        if role == "matched": return 2.0 * np.exp(np.linspace(-0.15, 0.15, MODES))
         if role == "displaced": return cluster(40.0).repeat(2)
         return np.geomspace(0.5, 100.0, MODES)
     if role == "matched": return np.r_[cluster(40.0), cluster(2.0)]
