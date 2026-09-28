@@ -29,3 +29,5 @@ jobs:
             experiments/results/15C_extended_timescale_iir_control_pca_results.csv
             experiments/results/15C_extended_timescale_iir_control_summary.csv
             experiments/results/15C_extended_timescale_iir_control_summary.json
+
+# Trigger CI after workflow installation without changing experiment logic.
