@@ -204,3 +204,41 @@ KERNEL_DESCRIPTORS = {
     g: kernel_descriptors(KERNELS[g]["gammas"], KERNELS[g]["weights"])
     for g in GEOMETRIES
 }
+
+
+def alignment_rate_pattern(process: str, role: str) -> np.ndarray:
+    """Return a 16-mode rate geometry for the 15B-2 alignment intervention."""
+    if process not in {"short", "multiscale", "long", "hidden_mix"}:
+        raise ValueError(process)
+    if role not in {"matched", "displaced", "broad"}:
+        raise ValueError(role)
+    def cluster(center, spread=0.15):
+        return center * np.exp(np.linspace(-spread, spread, 8))
+    if process == "short":
+        if role == "matched": return cluster(40.0).repeat(2)
+        if role == "displaced": return cluster(4.0).repeat(2)
+        return np.geomspace(0.5, 100.0, MODES)
+    if process == "long":
+        if role == "matched": return cluster(2.0).repeat(2)
+        if role == "displaced": return cluster(40.0).repeat(2)
+        return np.geomspace(0.5, 100.0, MODES)
+    if role == "matched": return np.r_[cluster(40.0), cluster(2.0)]
+    if role == "displaced": return np.r_[cluster(4.0), cluster(0.4)]
+    return np.geomspace(0.5, 100.0, MODES)
+
+ALIGNMENT_ROLES = ("matched", "displaced", "broad")
+ALIGNMENT_KERNELS = {
+    process: {role: {"gammas": alignment_rate_pattern(process, role), "weights": uniform_weights()}
+              for role in ALIGNMENT_ROLES}
+    for process in ("short", "multiscale", "long", "hidden_mix")
+}
+for _process in ALIGNMENT_KERNELS:
+    for _role in ALIGNMENT_ROLES:
+        _spec = ALIGNMENT_KERNELS[_process][_role]
+        _spec["coefficients"] = state_coefficients(_spec["gammas"])
+
+ALIGNMENT_KERNEL_DESCRIPTORS = {
+    process: {role: kernel_descriptors(spec["gammas"], spec["weights"])
+              for role, spec in roles.items()}
+    for process, roles in ALIGNMENT_KERNELS.items()
+}
