@@ -1,0 +1,25 @@
+name: Experiment 15B
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15B_process_geometry_alignment.py"
+      - "tests/test_experiment_15b.py"
+      - ".github/workflows/experiment-15b.yml"
+      - "min/**"
+      - "pyproject.toml"
+jobs:
+  run-15b:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15b.py tests/test_soe_memory_state.py
+      - run: python experiments/15B_process_geometry_alignment.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15b-results
+          path: experiments/results/15B_process_geometry_alignment_*
