@@ -1,0 +1,32 @@
+name: Experiment 15D
+on:
+  push:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15C_extended_timescale_iir_control.py"
+      - "experiments/15D_equal_budget_comparison.py"
+      - "tests/test_experiment_15d.py"
+      - ".github/workflows/experiment-15d.yml"
+      - "min/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+jobs:
+  run-15d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15d.py tests/test_soe_memory_state.py
+      - run: python experiments/15D_equal_budget_comparison.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15d-results
+          path: |
+            experiments/results/15D_equal_budget_comparison_cases.csv
+            experiments/results/15D_equal_budget_comparison_pca_results.csv
+            experiments/results/15D_equal_budget_comparison_summary.csv
+            experiments/results/15D_equal_budget_comparison_summary.json
