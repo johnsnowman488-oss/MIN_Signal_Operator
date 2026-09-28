@@ -125,7 +125,7 @@ def run_case(process,factor,snr_db,seed):
         for task in TASKS:
             Xi=X[:-1] if task=="prediction" else X
             target=x[1:] if task=="prediction" else latent[:,0]
-            curve,singular,d=evaluate_representation(X,target,split)[task]
+            curve,singular,d=fit_curve(Xi[:split],target[:split],Xi[split:],target[split:])
             cond=state_condition_number(X[:split])
             for k,v in curve.items():
                 pca_rows.append({"experiment":"15C_extended_timescale_iir_control",
