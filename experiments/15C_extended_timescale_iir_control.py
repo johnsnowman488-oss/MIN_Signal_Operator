@@ -104,9 +104,7 @@ def fit_curve(Xtr,target_tr,Xte,target_te):
 def evaluate_representation(X,target,split):
     out={}
     for task in TASKS:
-        Xi=X[:-1] if task=="prediction" else X
-        yi=target[1:] if task=="prediction" else target
-        curve,singular,d=fit_curve(Xi[:split],yi[:split],Xi[split:],yi[split:])
+        curve,singular,d=fit_curve(X[:split],target[:split],X[split:],target[split:])
         out[task]=(curve,singular,d)
     return out
 
