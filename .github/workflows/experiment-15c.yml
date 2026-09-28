@@ -30,6 +30,23 @@ jobs:
             experiments/results/15C_extended_timescale_iir_control_summary.csv
             experiments/results/15C_extended_timescale_iir_control_summary.json
 
-# Trigger CI after workflow installation without changing experiment logic.
 
-# Trigger CI after numerical bugfix.
+  run-15d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15d.py tests/test_soe_memory_state.py
+      - run: python experiments/15D_equal_budget_comparison.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15d-results
+          path: |
+            experiments/results/15D_equal_budget_comparison_cases.csv
+            experiments/results/15D_equal_budget_comparison_pca_results.csv
+            experiments/results/15D_equal_budget_comparison_summary.csv
+            experiments/results/15D_equal_budget_comparison_summary.json
