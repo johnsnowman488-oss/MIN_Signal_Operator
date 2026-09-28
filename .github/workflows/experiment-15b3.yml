@@ -1,0 +1,27 @@
+name: Experiment 15B-3
+on:
+  push:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15B3_task_optimal_timescale_sweep.py"
+      - "tests/test_experiment_15b3.py"
+      - ".github/workflows/experiment-15b3.yml"
+      - "min/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+jobs:
+  run-15b3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15b3.py tests/test_soe_memory_state.py
+      - run: python experiments/15B3_task_optimal_timescale_sweep.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15b3-results
+          path: experiments/results/15B3_task_optimal_timescale_*
