@@ -245,7 +245,10 @@ def main():
     meta=out/"15F_D_memory_geometry_closure_summary.json"
     for p,data in ((cases,rows),(summary,summarize(rows)),(deltas,paired(rows))):
         with p.open("w",newline="") as f:
-            w=csv.DictWriter(f,fieldnames=list(data[0])); w.writeheader(); w.writerows(data)
+            fieldnames = sorted({key for row in data for key in row})
+            w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(data)
     md={"experiment":"15F_D_memory_geometry_closure",
         "question":"Does the 15F result change when channel memory is distributed continuously rather than concentrated in symbol-spaced taps?",
         "channel_families":CHANNEL_FAMILIES,"budgets":list(BUDGETS),"processes":list(PROCESSES),
