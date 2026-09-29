@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - "experiments/15F_A_synthetic_communications.py"
+      - "experiments/15E_state_budget_sweep.py"
+      - "experiments/15C_extended_timescale_iir_control.py"
+      - "experiments/15_utils.py"
       - "tests/test_experiment_15f.py"
       - ".github/workflows/experiment-15f-a.yml"
       - "min/**"
@@ -12,7 +15,7 @@ on:
 jobs:
   run-15f-a:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,4 +30,5 @@ jobs:
           path: |
             experiments/results/15F_A_synthetic_communications_cases.csv
             experiments/results/15F_A_synthetic_communications_summary.csv
+            experiments/results/15F_A_synthetic_communications_paired_deltas.csv
             experiments/results/15F_A_synthetic_communications_summary.json
