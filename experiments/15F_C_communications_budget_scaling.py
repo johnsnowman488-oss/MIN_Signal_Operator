@@ -269,20 +269,23 @@ def paired(rows: list[dict]) -> list[dict]:
 
 
 def budget_deltas(rows: list[dict]) -> list[dict]:
-    lookup: dict[tuple, dict[int, dict[str, dict]]] = {}
+    lookup: dict[tuple, dict[int, dict]] = {}
     for row in rows:
         rep = row["representation"]
         if rep == "current_1":
             continue
+
+        family, budget_text = rep.rsplit("_", 1)
+        budget = int(budget_text)
         base = (
             row["modulation"],
             row["process"],
             row["scale_factor"],
             row["snr_db"],
             row["seed"],
-            rep,
+            family,
         )
-        lookup.setdefault(base, {})[int(row["state_budget"])] = row
+        lookup.setdefault(base, {})[budget] = row
 
     transitions = tuple(zip(BUDGETS[:-1], BUDGETS[1:]))
     out: list[dict] = []
@@ -302,12 +305,18 @@ def budget_deltas(rows: list[dict]) -> list[dict]:
                     "representation": key[5],
                     "n_from": int(n_from),
                     "n_to": int(n_to),
-                    "improvement_ber": float(lo["ber"] - hi["ber"]),
-                    "improvement_ser": float(lo["ser"] - hi["ser"]),
+                    "improvement_ber": float(
+                        lo["ber"] - hi["ber"]
+                    ),
+                    "improvement_ser": float(
+                        lo["ser"] - hi["ser"]
+                    ),
                     "improvement_evm_percent": float(
                         lo["evm_percent"] - hi["evm_percent"]
                     ),
-                    "improvement_nmse": float(lo["nmse"] - hi["nmse"]),
+                    "improvement_nmse": float(
+                        lo["nmse"] - hi["nmse"]
+                    ),
                 }
             )
 
