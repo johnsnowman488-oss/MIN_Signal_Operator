@@ -1,6 +1,6 @@
 # Experiment 15 Series — Reproducibility Chain
 
-This page is the provenance index for the current **15A–15E** MIN representation branch. It is intentionally a map, not a replacement for the experiment-specific protocols and analyses.
+This page is the provenance index for the current **15A–15F** MIN representation branch. It is intentionally a map, not a replacement for the experiment-specific protocols and analyses.
 
 ## Reproducibility rule
 
@@ -25,6 +25,9 @@ Local reruns are useful for development, but should not replace the recorded CI 
 | **15C** | Does the multi-mode result persist against a matched one-pole IIR control? | `experiments/15C_extended_timescale_iir_control.py` | `tests/test_experiment_15c.py` | `.github/workflows/experiment-15c.yml` | `docs/experiment_15C_analysis.md` | Run `36438562042`; `experiment-15c-results`; 2,880 cases / 46,080 PCA rows |
 | **15D** | Does representation geometry matter at an equal 16-state budget? | `experiments/15D_equal_budget_comparison.py` | `tests/test_experiment_15d.py` | `.github/workflows/experiment-15d.yml` | `docs/experiment_15D.md` | Run `36486139461`; 3,840 cases / 61,440 PCA rows; artifact SHA-256 `5b6a17cf891e431a9ef566ea9b8402ac84e6c7dd5c32624432bbec7f99f77f1b` |
 | **15E** | Does the conclusion survive when the actual temporal-state budget is swept? | `experiments/15E_state_budget_sweep.py` | `tests/test_experiment_15e.py` | `.github/workflows/experiment-15e.yml` | `docs/experiment_15E.md` | Run `36512822394`; artifact ID `11009583130`; SHA-256 `db3f1377d3e13cbd04da714aa61d8ec776539725747a953c64fc83b4ba27b702`; 19,200 cases / 119,040 PCA rows |
+| **15F-A** | Does the 15E representation/budget result transfer to synthetic communications symbol recovery? | `experiments/15F_A_synthetic_communications.py` | `tests/test_experiment_15f.py` | `.github/workflows/experiment-15f-a.yml` | `docs/experiment_15F_A.md` | Run `36515648536`; artifact ID `11010817054`; SHA-256 `8f075dd633c5f5005015e11ccc1f88de564a38c79317c4588275f6aee74a3571`; 7,560 cases / 1,512 summaries / 5,400 paired deltas |
+| **15F-B** | Does the fixed-N=16 representation relationship survive controlled channel stress? | `experiments/15F_B_channel_stress.py` | `tests/test_experiment_15fb.py` | `.github/workflows/experiment-15f-b.yml` | `docs/experiment_15F_B.md` | Run `36516368624`; artifact ID `11011511221`; SHA-256 `e215d050d4de01059495e9034ec903a3433ce0d8a2c87b56bf62d4708c5063b6`; 13,500 cases / 2,700 summaries / 8,100 paired deltas |
+| **15F-C** | How does communications error change across the actual 1, 2, 4, 8, 16 state budgets? | `experiments/15F_C_communications_budget_scaling.py` | `tests/test_experiment_15fc.py` | `.github/workflows/experiment-15f-c.yml` | `docs/experiment_15F_C.md` | Run `36572380465`; artifact ID `11034756731`; SHA-256 `9905fb43b6128aea144b59ae0b34eb0abe7d8c3a1b65a47ca71e828df0732a7b`; 7,560 cases / 1,512 summaries / 5,400 paired deltas / 5,760 budget deltas |
 
 The shared numerical layer is **`experiments/15_utils.py`**. The 15-series experiments independently use this utility layer and validate its SOE-state equivalence against the repository implementation.
 
@@ -47,9 +50,26 @@ The evidence remains task-dependent. It should not be summarized as universal MI
 ### 15E
 Makes actual temporal-state budget the independent variable: 1, 2, 4, 8, 16 states. The direct full-state readout is primary; PCA is secondary. The cleanest discriminatory region is around 4 states, while high-state conditioning and non-monotonic 16-state curves limit stronger claims.
 
+### 15F-A
+Transfers the 15E representation families into controlled BPSK/QPSK complex-baseband symbol recovery. The full state-budget grid is retained, so the experiment already contains the communications budget curves later analyzed explicitly by 15F-C.
+
+### 15F-B
+Holds the representation budget at N=16 and widens the communications environment with multipath and slow fading. The corrected artifact shows no broad MIN advantage; it identifies regime-specific differences while FIR remains lower-error in the tested synthetic task.
+
+### 15F-C
+Provides the explicit budget-transition accounting for the communications results. Its four primary representation curves reproduce the 15F-A grid rather than adding an independent condition set. Its new analytical output is the marginal-state table for 1->2, 2->4, 4->8, and 8->16, plus a controlled current-observation baseline using the same one-step linear-readout protocol.
+
 ## Artifact contents
 
 The CI workflows write numerical outputs under `experiments/results/` and upload them as workflow artifacts. Generated result CSV/JSON files are **not required to be committed to Git**; the CI artifact is the recorded numerical output for each execution.
+
+For 15E and the later 15F experiments, the expected outputs are written under `experiments/results/` and uploaded by the dedicated workflow. For 15F-C these are:
+
+- `15F_C_communications_budget_scaling_cases.csv`
+- `15F_C_communications_budget_scaling_summary.csv`
+- `15F_C_communications_budget_scaling_paired_deltas.csv`
+- `15F_C_communications_budget_scaling_budget_deltas.csv`
+- `15F_C_communications_budget_scaling_summary.json`
 
 For 15E the expected outputs are:
 
