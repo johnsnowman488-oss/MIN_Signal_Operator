@@ -260,6 +260,16 @@ Run the test suite with:
 
 Experiments should remain reproducible and should record the assumptions, baselines, seeds, and evaluation protocol needed to interpret their results.
 
+## Experiments 15A–15E: reproducibility chain
+
+The current MIN representation branch is organized as a controlled experimental ladder:
+
+**15A geometry × task generalization → 15B process × geometry → 15B-2 explicit alignment → 15B-3 timescale sweep → 15C one-pole control → 15D equal 16-state comparison → 15E actual state-budget sweep.**
+
+Each stage has a dedicated implementation, test module, CI workflow, and experiment documentation. Numerical claims are tied to CI-produced artifacts rather than undocumented local reruns. The complete provenance map, artifact naming, claim boundaries, and remaining documentation gaps are recorded in [docs/experiment_15_series.md](docs/experiment_15_series.md).
+
+The 15-series does **not** establish universal MIN superiority. Its current evidence is narrower: temporal memory geometry and actual state allocation can affect task accessibility, with the effect depending on the process, task, representation budget, and numerical conditioning.
+
 ## Research status
 
 **Active research — representation/task branch.**
