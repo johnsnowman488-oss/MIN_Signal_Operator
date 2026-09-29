@@ -192,7 +192,7 @@ def main():
     }
     for path, data in ((paths["cases"], rows), (paths["summary"], summarize(rows)), (paths["paired"], paired(rows))):
         with path.open("w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=sorted({k for row in data for k in row})
+            w = csv.DictWriter(f, fieldnames=sorted({k for row in data for k in row}))
             w.writeheader(); w.writerows(data)
     metadata = {
         "experiment": "15F_A_synthetic_communications",
