@@ -1,7 +1,7 @@
 """Experiment 15F-D: communications closure under memory geometry.
 
 This is the final 15F stress experiment.
-# CI rerun marker: corrected test scope, bounded horizon control, and test encoding. It separates:
+# CI rerun marker: final clean 15F-D test suite. It separates:
 1) symbol-spaced sparse/dense delay memory,
 2) smooth continuous delay-spread memory,
 3) multiscale continuous memory.
