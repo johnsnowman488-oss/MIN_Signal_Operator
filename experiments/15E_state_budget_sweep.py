@@ -299,7 +299,8 @@ def run_case(
             abs(by_key[(process0, task0, budget0, factor0, snr0, seed0, iir_name)]
                 - by_key[(process0, task0, budget0, factor0, snr0, seed0, dense_name)])
         )
-    dense_error = float(max(dense_diffs)) if dense_diffs else float("nan")    return case_rows, pca_rows, {"dense_state_max_local_nmse_abs_diff": dense_error}
+    dense_error = float(max(dense_diffs)) if dense_diffs else float("nan")
+    return case_rows, pca_rows, {"dense_state_max_local_nmse_abs_diff": dense_error}
 
 
 def summarize(rows: list[dict]) -> list[dict]:
