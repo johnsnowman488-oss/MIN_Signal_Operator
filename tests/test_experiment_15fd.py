@@ -27,7 +27,7 @@ def test_horizon_fir_is_deterministic():
 
 def test_case_shape_and_metrics():
     rows=M.run_case("BPSK","multiscale","diffuse_exp",12.0,10.0,0,4)
-    assert len(rows)==5
+    assert len(rows)==4
     assert all(np.isfinite(r["ber"]) for r in rows)
     assert {r["state_budget"] for r in rows}=={4}
-    assert any(r["representation"].startswith("fir_horizon95") for r in rows)
+    hrows=M.run_case("BPSK","multiscale","diffuse_exp",12.0,10.0,0,16)\n    assert len(hrows)==5\n    assert any(r["representation"].startswith("fir_horizon95") for r in hrows)
