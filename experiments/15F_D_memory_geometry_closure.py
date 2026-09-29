@@ -39,6 +39,8 @@ from min.signals import generate_bpsk, generate_qpsk
 
 SEEDS = U15E.SEEDS
 BUDGETS = U15E.BUDGETS
+HORIZON_BUDGET = 16
+HORIZON_REFERENCE_SNR = 10.0
 PROCESSES = U15E.PROCESSES
 SCALE_FACTORS = (4.0, 12.0, 32.0)
 SNR_DB = (0.0, 10.0, 20.0)
@@ -167,19 +169,26 @@ def run_case(modulation, process, family, factor, snr_db, seed, budget):
             **m, **representation_cost(name, state.shape[1]),
             "temporal_horizon_samples": int(state.shape[1]),
         })
-    # Horizon-matched FIR: same 95% continuous MIN kernel horizon, independent of
-    # the observed channel realization.
-    k95 = min_horizon_samples(gammas)
-    hf = fir_states(noisy, k95)
-    m = metrics(hf[idx], tx, modulation)
-    rows.append({
-        "experiment": "15F_D_memory_geometry_closure",
-        "modulation": modulation, "process": process, "channel_family": family,
-        "scale_factor": float(factor), "snr_db": float(snr_db), "seed": int(seed),
-        "representation": f"fir_horizon95_{k95}", "state_budget": int(budget),
-        **m, **representation_cost("fir", k95),
-        "temporal_horizon_samples": int(k95), "horizon_match_fraction": 0.95,
-    })
+    # Horizon-matched FIR is a diagnostic, not a second full grid. It is
+    # evaluated only at N=16 and at the reference SNR to keep the control
+    # computationally commensurate with the main experiment. The FIR uses
+    # symbol-spaced taps, so its state count is the 95% MIN kernel horizon
+    # measured in symbols rather than raw ADC samples.
+    if budget == HORIZON_BUDGET and float(snr_db) == HORIZON_REFERENCE_SNR:
+        k95_samples = min_horizon_samples(gammas)
+        k95 = max(1, int(np.ceil(k95_samples / SPS)))
+        symbol_stream = noisy[idx]
+        hf = fir_states(symbol_stream, k95)
+        m = metrics(hf, tx, modulation)
+        rows.append({
+            "experiment": "15F_D_memory_geometry_closure",
+            "modulation": modulation, "process": process, "channel_family": family,
+            "scale_factor": float(factor), "snr_db": float(snr_db), "seed": int(seed),
+            "representation": f"fir_horizon95_{k95}", "state_budget": int(budget),
+            **m, **representation_cost("fir", k95),
+            "temporal_horizon_samples": int(k95), "horizon_match_fraction": 0.95,
+            "horizon_control_scope": "N=16, SNR=10 dB, symbol-spaced FIR",
+        })
     return rows
 
 def summarize(rows):
@@ -242,7 +251,7 @@ def main():
         "scale_factors":list(SCALE_FACTORS),"snr_db":list(SNR_DB),"modulations":list(MODULATIONS),
         "seeds":list(SEEDS),"train_symbols":NUM_TRAIN_SYMBOLS,"test_symbols":NUM_TEST_SYMBOLS,
         "representations":["min_N","iir_logspread_N","dense_ss_N","fir_N","fir_horizon95_K"],
-        "horizon_control":"FIR_K chosen from analytic MIN kernel 95% integrated mass; K is not fitted to channel output.",
+        "horizon_control":"At N=16 and 10 dB reference SNR, FIR_K is chosen from analytic MIN kernel 95% integrated mass and converted to symbol-spaced taps; K is not fitted to channel output.",
         "repository_state_equivalence_relative_error":eq,
         "case_rows":len(rows),"paired_delta_rows":len(paired(rows)),
         "interpretation_rule":"No family is selected post hoc; all channel families and all processes are reported.",
