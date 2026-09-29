@@ -1,0 +1,30 @@
+name: Experiment 15F-A
+on:
+  push:
+    paths:
+      - "experiments/15F_A_synthetic_communications.py"
+      - "tests/test_experiment_15f.py"
+      - ".github/workflows/experiment-15f-a.yml"
+      - "min/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+jobs:
+  run-15f-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15f.py tests/test_soe_memory_state.py
+      - run: python experiments/15F_A_synthetic_communications.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15f-a-results
+          path: |
+            experiments/results/15F_A_synthetic_communications_cases.csv
+            experiments/results/15F_A_synthetic_communications_summary.csv
+            experiments/results/15F_A_synthetic_communications_summary.json
