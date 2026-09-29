@@ -1,0 +1,35 @@
+name: Experiment 15F-D
+
+on:
+  push:
+    paths:
+      - "experiments/15F_D_memory_geometry_closure.py"
+      - "experiments/15E_state_budget_sweep.py"
+      - "experiments/15C_extended_timescale_iir_control.py"
+      - "experiments/15_utils.py"
+      - "tests/test_experiment_15fd.py"
+      - ".github/workflows/experiment-15f-d.yml"
+      - "min/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+jobs:
+  run-15f-d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15fd.py tests/test_soe_memory_state.py
+      - run: python experiments/15F_D_memory_geometry_closure.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15f-d-results
+          path: |
+            experiments/results/15F_D_memory_geometry_closure_cases.csv
+            experiments/results/15F_D_memory_geometry_closure_summary.csv
+            experiments/results/15F_D_memory_geometry_closure_paired_deltas.csv
+            experiments/results/15F_D_memory_geometry_closure_summary.json
