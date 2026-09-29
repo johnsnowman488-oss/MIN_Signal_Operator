@@ -282,23 +282,24 @@ def run_case(
                 }
             )
 
-    dense_error = float(
-        np.max(
-            [
-                abs(
-                    case_rows[i]["full_state_nmse"]
-                    - case_rows[i + 1]["full_state_nmse"]
-                )
-                for i in range(len(case_rows) - 1)
-                for _ in [0]
-                if case_rows[i]["representation"].startswith("iir_logspread_")
-                and case_rows[i + 1]["representation"].startswith("dense_ss_")
-                and case_rows[i]["process"] == case_rows[i + 1]["process"]
-                and case_rows[i]["task"] == case_rows[i + 1]["task"]
-            ]
+    by_key = {
+        (r["process"], r["task"], r["state_budget"], r["scale_factor"],
+         r["snr_db"], r["seed"], r["representation"]): r["full_state_nmse"]
+        for r in case_rows
+    }
+    dense_diffs = []
+    for base in {
+        (r["process"], r["task"], r["state_budget"], r["scale_factor"],
+         r["snr_db"], r["seed"]) for r in case_rows
+    }:
+        process0, task0, budget0, factor0, snr0, seed0 = base
+        iir_name = f"iir_logspread_{budget0}"
+        dense_name = f"dense_ss_{budget0}"
+        dense_diffs.append(
+            abs(by_key[(process0, task0, budget0, factor0, snr0, seed0, iir_name)]
+                - by_key[(process0, task0, budget0, factor0, snr0, seed0, dense_name)])
         )
-    ) if case_rows else float("nan")
-    return case_rows, pca_rows, {"dense_state_max_local_nmse_abs_diff": dense_error}
+    dense_error = float(max(dense_diffs)) if dense_diffs else float("nan")    return case_rows, pca_rows, {"dense_state_max_local_nmse_abs_diff": dense_error}
 
 
 def summarize(rows: list[dict]) -> list[dict]:
