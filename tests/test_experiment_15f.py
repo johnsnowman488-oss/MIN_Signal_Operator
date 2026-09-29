@@ -1,4 +1,4 @@
-"""Tests for Experiment 15F-A communications helpers."""
+"""Tests for corrected 15F-A and its 15E lineage."""
 import importlib.util
 from pathlib import Path
 import numpy as np
@@ -8,31 +8,32 @@ SPEC = importlib.util.spec_from_file_location("exp15f", ROOT / "experiments" / "
 MOD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MOD)
 
-def test_channel_memory_is_causal_and_dc_preserving():
-    x = np.ones(64, dtype=complex)
-    y = MOD.channel_memory(x, 0.02)
-    assert np.allclose(y[-10:], 1.0)
-    z = np.zeros_like(x); z[20:] = 1.0
-    yz = MOD.channel_memory(z, 0.02)
-    assert np.allclose(yz[:20], 0.0)
+def test_15f_imports_15e():
+    assert MOD.U15E.__file__.endswith("15E_state_budget_sweep.py")
+    assert tuple(MOD.BUDGETS) == (1, 2, 4, 8, 16)
 
-def test_min_state_dimensions_and_finiteness():
-    x = np.ones(128, dtype=complex)
-    for budget in MOD.BUDGETS:
-        state = MOD.min_states(x, 0.02, budget)
-        assert state.shape == (128, budget)
-        assert np.isfinite(state).all()
+def test_15e_representation_set_is_preserved():
+    reps, _, _ = MOD.U15E.representation_specs("short", 4.0, np.ones(64, dtype=complex), 4)
+    assert set(reps) == {"min_4", "iir_logspread_4", "dense_ss_4", "fir_4"}
 
-def test_decision_and_evm_metrics_are_well_defined():
-    ref = np.array([1+0j, -1+0j, 1+0j, -1+0j])
-    est = ref.copy()
-    assert MOD.ber("BPSK", ref, est) == 0.0
-    assert MOD.ser("BPSK", ref, est) == 0.0
-    qref = np.ones(4, dtype=complex) * np.exp(1j*np.pi/4)
-    assert MOD.evm("QPSK", qref, qref) == 0.0
+def test_channel_is_causal_and_dc_preserving():
+    x = np.ones(256, dtype=complex)
+    y = MOD.channel_memory(x, "short", 4.0)
+    assert np.allclose(y[-32:], 1.0, atol=1e-10)
+    z = np.zeros_like(x); z[80:] = 1.0
+    yz = MOD.channel_memory(z, "short", 4.0)
+    assert np.allclose(yz[:80], 0.0)
 
-def test_case_row_count_and_holdout():
-    rows = MOD.run_case("BPSK", "tau_0.020", 10.0, 0)
-    assert len(rows) == 1 + 3 * len(MOD.BUDGETS)
-    assert all(r["train_symbols"] == MOD.TRAIN_SYMBOLS for r in rows)
-    assert all(r["test_symbols"] == MOD.NUM_SYMBOLS - MOD.TRAIN_SYMBOLS for r in rows)
+def test_metrics_zero_for_perfect_decisions():
+    b = np.array([1+0j, -1+0j, 1+0j, -1+0j])
+    assert MOD.ber("BPSK", b, b) == 0.0
+    assert MOD.ser("BPSK", b, b) == 0.0
+    q = np.exp(1j*(np.pi/4 + np.arange(4)*np.pi/2))
+    assert MOD.ber("QPSK", q, q) == 0.0
+    assert MOD.ser("QPSK", q, q) == 0.0
+
+def test_case_shape_and_holdout():
+    rows = MOD.run_case("BPSK", "short", 4.0, 10.0, 0)
+    assert len(rows) == 1 + 4 * len(MOD.BUDGETS)
+    assert all(r["train_symbols"] == MOD.NUM_TRAIN_SYMBOLS for r in rows)
+    assert all(r["test_symbols"] == MOD.NUM_TEST_SYMBOLS for r in rows)
