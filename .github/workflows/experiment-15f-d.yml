@@ -13,6 +13,10 @@ on:
       - "pyproject.toml"
   workflow_dispatch:
 
+concurrency:
+  group: 15f-d-closure
+  cancel-in-progress: true
+
 jobs:
   run-15f-d:
     runs-on: ubuntu-latest
