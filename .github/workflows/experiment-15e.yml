@@ -9,6 +9,15 @@ on:
       - ".github/workflows/experiment-15e.yml"
       - "min/**"
       - "pyproject.toml"
+  pull_request:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15C_extended_timescale_iir_control.py"
+      - "experiments/15E_state_budget_sweep.py"
+      - "tests/test_experiment_15e.py"
+      - ".github/workflows/experiment-15e.yml"
+      - "min/**"
+      - "pyproject.toml"
   workflow_dispatch:
 
 jobs:
