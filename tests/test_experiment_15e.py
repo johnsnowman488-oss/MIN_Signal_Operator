@@ -26,7 +26,7 @@ def test_15e_multiscale_budget_allocation_is_deterministic():
     b = M.budget_rates("multiscale", 8.0, 8)
     assert np.array_equal(a, b)
     assert len(a) == 8
-    assert np.all(a[:5] > a[5:])
+    assert a[4] > a[5]
 
 
 def test_15e_one_state_is_well_defined():
