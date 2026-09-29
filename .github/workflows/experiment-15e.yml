@@ -1,0 +1,35 @@
+name: Experiment 15E
+on:
+  push:
+    paths:
+      - "experiments/15_utils.py"
+      - "experiments/15C_extended_timescale_iir_control.py"
+      - "experiments/15E_state_budget_sweep.py"
+      - "tests/test_experiment_15e.py"
+      - ".github/workflows/experiment-15e.yml"
+      - "min/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+jobs:
+  run-15e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[research,test]"
+      - run: pytest -q tests/test_experiment_15e.py tests/test_soe_memory_state.py
+      - run: python experiments/15E_state_budget_sweep.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-15e-results
+          path: |
+            experiments/results/15E_state_budget_sweep_cases.csv
+            experiments/results/15E_state_budget_sweep_pca_results.csv
+            experiments/results/15E_state_budget_sweep_summary.csv
+            experiments/results/15E_state_budget_sweep_paired_deltas.csv
+            experiments/results/15E_state_budget_sweep_marginal_state_value.csv
+            experiments/results/15E_state_budget_sweep_summary.json
