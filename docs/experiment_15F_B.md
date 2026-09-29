@@ -63,3 +63,20 @@ Therefore 15F-B does not vary state budget. This keeps channel-stress effects se
 ## CI authority
 
 CI runs the tests, executes the experiment, and uploads the CSV/JSON artifact. The retrieved CI artifact is the numerical record.
+
+## CI result: run 36516368624
+
+The corrected CI run completed successfully at commit e8d347a1297a9fd32fc4df8cd4f6a770608dad3e. The artifact contains 13,500 case rows, 2,700 summary rows, and 8,100 paired-delta rows. Repository SOE equivalence remained 1.439e-11.
+
+Across the full grid, mean BER was 0.180410 for MIN-16, 0.179055 for IIR-logspread-16, 0.179055 for dense-state-16, 0.120993 for FIR-16, and 0.247013 for the trained current-observation baseline.
+
+The paired MIN-minus-IIR mean deltas were +0.001355 BER, +0.003966 SER, +0.8153 EVM percentage points, and +0.003821 NMSE. These are descriptive aggregate differences, not a universal comparison.
+
+A key control result is that the IIR-logspread and dense-state representations matched exactly on BER and SER across the artifact. Their maximum absolute EVM difference was about 1.7e-5 percentage points and maximum NMSE difference about 3.5e-7.
+
+The single-timescale 15E processes (short and long) produce effectively identical MIN and log-spread rate sets at N=16, so their communications rows are expected to coincide up to numerical precision. The nontrivial MIN/IIR comparison is therefore concentrated in multiscale and hidden_mix.
+
+Within those multiscale cases, the mean MIN-minus-IIR BER delta was positive for no-stress and multipath conditions, while under strong fading it was approximately neutral/slightly negative. This means 15F-B does not support a broad communications advantage claim; it identifies specific channel regimes that merit more targeted analysis later.
+
+The FIR-16 control remained substantially better on the tested synthetic task. This is compatible with the fact that FIR-16 stores 16 consecutive samples while MIN/IIR distribute 16 states over selected temporal scales; equal state count does not imply equal physical time coverage.
+
