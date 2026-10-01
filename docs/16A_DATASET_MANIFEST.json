@@ -257,7 +257,24 @@
         "SNR_if_released",
         "Doppler_if_released"
       ],
-      "subset_rule": "Deterministic stratification over all five documented PHY configurations, multiple collection sessions/dates, and SNR/Doppler regimes. Select whole sessions or packet units; commit exact file/part list and counts before evaluation.",
+      "subset_rule": "Do not download all data by default. First inventory the publisher record, README, checksums, archive/member structure, and any available file index; determine whether selective acquisition is possible. Then deterministically stratify over all five documented PHY configurations, multiple collection sessions/dates, and SNR/Doppler regimes. Prefer whole sessions or packet units so temporal correlations are preserved; commit exact archive part/file/member selection and counts before evaluation.",
+      "acquisition_strategy": {
+        "raw_iq_volume_gb_approx": 127,
+        "zenodo_record_volume_gb_approx": 2600,
+        "volume_interpretation": "127 GB is the raw-IQ volume described by the dataset README; the larger Zenodo record volume is not assumed to be equivalent and must be inventoried before acquisition scope is fixed.",
+        "coverage_over_volume": true,
+        "full_acquisition_required": false,
+        "selective_acquisition_allowed": true,
+        "selection_basis": [
+          "all five documented PHY configurations",
+          "multiple collection sessions/dates",
+          "SNR regimes",
+          "Doppler regimes",
+          "whole-session or whole-packet temporal units where practical"
+        ],
+        "packet_level_use": "Communication metrics only where transmitted/reference ground truth can be established and validated.",
+        "session_level_use": "Temporal/channel analysis including Doppler evolution, frequency/amplitude evolution, temporal correlation, packet spacing, and memory-timescale characterization."
+      },
       "hashes": {
         "publisher": [
           {
@@ -421,6 +438,39 @@
       "reason_for_tier": "Specialized raw-IF stress test outside convenient complex-baseband terrestrial communication data; useful for ingestion/robustness but not required for the minimum Paper-1 evidence."
     }
   ],
+  "acquisition_strategy": {
+    "repository_raw_data": false,
+    "physical_acquisition_environment": "Network-enabled VM, workstation, server, or other reliable external acquisition environment; ordinary CI must not download full third-party physical datasets.",
+    "state_machine": [
+      "DECLARED",
+      "SOURCE_REACHABLE",
+      "ARCHIVE_ACQUIRED",
+      "PUBLISHER_CHECKSUM_VERIFIED",
+      "LOCAL_HASHED",
+      "INVENTORIED",
+      "SUBSET_FROZEN",
+      "16B-1_COMPLETE"
+    ],
+    "blocked_state": "SOURCE_REACHABILITY_BLOCKED",
+    "hash_layers": [
+      "publisher checksum",
+      "local archive SHA-256",
+      "member/file SHA-256 where practical"
+    ],
+    "required_provenance": [
+      "source identifier/version/URL/DOI",
+      "acquisition timestamp",
+      "publisher checksum",
+      "local SHA-256",
+      "archive/file inventory",
+      "exact selected member/file paths",
+      "deterministic subset parameters and counts",
+      "license/source observations",
+      "acquisition tool/version"
+    ],
+    "physical_gate": "No physical dataset is frozen until the actual bytes have been acquired, publisher checksums verified, local SHA-256 recorded, inventory produced, and exact deterministic subset committed.",
+    "ci_boundary": "CI validates manifests, deterministic selection logic, and local fixtures; it does not acquire or store third-party raw archives."
+  },
   "paper_1_minimum_set": {
     "tier_0": [
       "radioml_2016_10a",
@@ -433,6 +483,6 @@
     "tier_2_optional": [
       "cygnss_l1_raw_if"
     ],
-    "rationale": "Two synthetic controls plus two materially different physical regimes provides a small, coverage-driven evidence set without requiring bulk download of multi-terabyte archives."
+    "rationale": "Two synthetic controls plus two materially different physical regimes provides a small, coverage-driven evidence set without requiring bulk download of large archives. Physical generalization requires both Tier-1 regimes."
   }
 }
