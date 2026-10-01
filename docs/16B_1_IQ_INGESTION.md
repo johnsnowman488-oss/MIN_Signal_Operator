@@ -25,8 +25,23 @@ uses:
 
 The implementation is little-endian (<f4) for the float32 wire values.
 
-The code does not silently repair malformed streams. An odd number of float32
-values is rejected because it represents an incomplete I/Q pair.
+The code does not silently repair malformed streams. An IQ file whose byte
+length is not a multiple of 8 bytes per complex sample is rejected.
+
+## Large-file handling
+
+Two different operations are kept explicit:
+
+1. The sample loader seeks directly to a requested sample interval, so a small
+   slice does not require loading the full recording.
+2. The file-integrity scanner reads the raw file in fixed-size chunks, so the
+   full-record integrity pass is bounded in memory even for multi-GB archives.
+
+The source SHA-256 is also computed incrementally over the complete raw bytes.
+
+This matters for the Stage-16 candidates because the released physical archives
+range from hundreds of MB to multi-GB/TB-scale collections; 16B-1 must not make
+whole-file materialization part of the ingestion contract.
 
 ## Provenance contract
 
@@ -44,14 +59,16 @@ Every selected recording must carry the following fields:
 
 The emitted recording manifest additionally records:
 
-- SHA-256 of the exact bytes consumed;
-- byte size;
-- sample count and duration;
+- SHA-256 of the exact source bytes;
+- byte size and complete sample count;
+- number of samples actually scanned/read;
+- duration implied by the declared sample rate;
 - wire dtype/layout;
 - finite/non-finite count;
 - I/Q means and RMS values;
 - Q/I power ratio where defined;
 - mean power and peak magnitude;
+- chunk size used by the integrity scanner;
 - whether the read was intentionally truncated for a bounded smoke test.
 
 ## Integrity checks
@@ -72,7 +89,7 @@ clipping repair, synchronization, filtering, or gain adjustment occurs here.
 The SHA-256 is computed over the exact source file bytes. For a complete raw
 recording, the hash covers the entire file. For a bounded smoke test, the
 source hash still covers the complete source file, while the manifest marks
-that only a sample prefix was read.
+that only a sample prefix was scanned.
 
 Publisher-provided checksums from 16A remain provenance fields; 16B-1 does not
 claim that a local SHA-256 is equivalent to a publisher MD5 or other source
