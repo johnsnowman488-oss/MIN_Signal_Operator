@@ -20,8 +20,10 @@ SPEC.loader.exec_module(MOD)
 REQUIRED_METADATA = MOD.REQUIRED_METADATA
 SAMPLE_REPRESENTATION = MOD.SAMPLE_REPRESENTATION
 build_recording_manifest = MOD.build_recording_manifest
+iq_file_integrity_summary = MOD.iq_file_integrity_summary
 iq_integrity_summary = MOD.iq_integrity_summary
 load_complex64_iq = MOD.load_complex64_iq
+raw_iq_sample_count = MOD.raw_iq_sample_count
 sha256_file = MOD.sha256_file
 validate_metadata = MOD.validate_metadata
 
@@ -71,11 +73,17 @@ def test_sample_slice_uses_sample_indices(tmp_path: Path) -> None:
     assert np.array_equal(loaded, expected[2:5])
 
 
+def test_sample_count_is_derived_from_exact_file_size(tmp_path: Path) -> None:
+    path = tmp_path / "iq.bin"
+    write_fixture(path)
+    assert raw_iq_sample_count(path) == 8
+
+
 def test_rejects_incomplete_iq_pair(tmp_path: Path) -> None:
     path = tmp_path / "bad.bin"
     np.arange(5, dtype="<f4").tofile(path)
-    with pytest.raises(ValueError, match="even number"):
-        load_complex64_iq(path)
+    with pytest.raises(ValueError, match="multiple of 8"):
+        raw_iq_sample_count(path)
 
 
 def test_metadata_contract_is_complete_and_valid() -> None:
@@ -103,22 +111,38 @@ def test_integrity_summary_detects_nonfinite_samples() -> None:
     assert result["finite_fraction"] == pytest.approx(1 / 3)
 
 
+def test_file_integrity_scan_matches_array_summary(tmp_path: Path) -> None:
+    path = tmp_path / "iq.bin"
+    expected = write_fixture(path)
+    array_summary = iq_integrity_summary(expected)
+    file_summary = iq_file_integrity_summary(path, chunk_samples=2)
+    assert file_summary == pytest.approx(array_summary, rel=0, abs=1e-12)
+
+
 def test_manifest_hash_is_hash_of_exact_source_bytes(tmp_path: Path) -> None:
     path = tmp_path / "iq.bin"
     write_fixture(path)
-    manifest = build_recording_manifest(path, fixture_metadata())
+    manifest = build_recording_manifest(path, fixture_metadata(), chunk_samples=3)
     assert manifest["source"]["sha256"] == sha256_file(path)
     assert manifest["source"]["bytes"] == path.stat().st_size
+    assert manifest["ingestion"]["samples_total"] == 8
     assert manifest["ingestion"]["samples_read"] == 8
     assert manifest["ingestion"]["truncated_read"] is False
+    assert manifest["ingestion"]["chunk_samples"] == 3
 
 
 def test_bounded_read_does_not_change_source_hash(tmp_path: Path) -> None:
     path = tmp_path / "iq.bin"
     write_fixture(path)
-    full = build_recording_manifest(path, fixture_metadata())
-    bounded = build_recording_manifest(path, fixture_metadata(), max_samples=3)
+    full = build_recording_manifest(path, fixture_metadata(), chunk_samples=2)
+    bounded = build_recording_manifest(
+        path,
+        fixture_metadata(),
+        max_samples=3,
+        chunk_samples=2,
+    )
     assert bounded["source"]["sha256"] == full["source"]["sha256"]
+    assert bounded["ingestion"]["samples_total"] == 8
     assert bounded["ingestion"]["samples_read"] == 3
     assert bounded["ingestion"]["truncated_read"] is True
     assert bounded["integrity"]["sample_count"] == 3
