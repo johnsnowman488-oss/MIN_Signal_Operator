@@ -40,7 +40,7 @@ No raw dataset is stored in this repository. The manifest is the source of truth
 - **Exact release identifier:** RadioML 2018.01A (historical dataset from 2017).
 - **Source:** DeepSig historical datasets page.
 - **License status:** **Verified — CC BY-NC-SA 4.0**, per DeepSig's current license notice covering the datasets on that page.
-- **Data size / structure:** Synthetic dataset with simulated channel effects; 24 digital/analog modulation types; 2,000,000 examples; each example is 1,024 samples; HDF5.
+- **Data size / structure:** Synthetic dataset with simulated channel effects; 24 modulation types; 2,000,000 examples × 1,024 samples; HDF5.
 - **Sample representation:** Complex floating-point values in HDF5.
 - **Metadata/labels available:** modulation type and dataset conditions including SNR as part of the historical benchmark organization.
 - **Subset-selection rule:** Deterministic, stratified sample across modulation and SNR cells. Use a fixed manifest of example indices rather than random sampling at runtime.
@@ -76,14 +76,18 @@ No raw dataset is stored in this repository. The manifest is the source of truth
 - **Publisher files:** 18 split ZIP parts plus README.md.
 - **Publisher-provided README MD5:** `9fef031bd6cdec3ea1aa38e9dfc9238a`
 - **Publisher-provided ZIP-part MD5s:** Recorded in `16A_DATASET_MANIFEST.json` for parts 001–018.
-- **Data organization:** 181 raw session files; ~127 GB raw data described in README; 6,664 valid LoRa packets; collected 2025-05-05 through 2025-05-17.
+- **Data organization:** 181 raw session files; approximately **127 GB of raw IQ** described in the dataset README; 6,664 valid LoRa packets; collected 2025-05-05 through 2025-05-17.
+- **Record-level volume distinction:** The current Zenodo record displays approximately **2.6 TB of total record data volume**, while the dataset README describes approximately **127 GB of raw IQ**. These are not interchangeable quantities. 127 GB refers to the raw-IQ dataset described by the release; the larger Zenodo record volume must be inventoried before acquisition scope is assumed.
 - **Format:** Headerless raw `.bin`; Complex64 (float32 I and float32 Q), interleaved [I0,Q0,I1,Q1,...].
 - **RF/acquisition:** 4 MHz sampling; 399–403 MHz; single LoRa ground terminal; HackRF SDR; real LEO satellite overpasses.
 - **Physical-layer configurations documented in README:** center frequency, bandwidth, spreading factor; five detected configurations including 125/62.5/250 kHz bandwidths and SF10/SF11.
-- **Physical conditions:** varying SNR and Doppler; packet sparsity ~3% of session time.
-- **Metadata/labels available for experiment design:** session/file identity; collection date; physical-layer configuration; detected packet identity/locations where recoverable from README/data; SNR/Doppler as available from released metadata or derived signal analysis.
-- **Subset-selection rule:** Do not download all parts by default. Construct a deterministic physical-validation subset stratified by (a) all five documented PHY configurations, (b) multiple collection sessions/dates, and (c) SNR/Doppler regimes. Prefer whole-session or whole-packet units so temporal correlations are not broken. The exact part/file selection and sample counts become a committed derived manifest before the run.
-- **Local hash requirement:** Verify every acquired ZIP against the publisher MD5; then compute SHA-256 for the selected archives and extracted source files used by experiments.
+- **Physical conditions:** varying SNR and Doppler; packet sparsity approximately 3% of session time.
+- **Metadata/labels available for experiment design:** session/file identity; collection date; physical-layer configuration; packet identity/locations where recoverable from released metadata/data; SNR/Doppler as available from released metadata or derived signal analysis.
+- **Subset-selection rule:** **Do not download all LoRadar data by default.** First inventory the publisher record, README, checksums, archive/member structure, and any available file index. Determine whether the required physical subset can be selected from published metadata before transferring large archives. Then construct a deterministic physical-validation subset stratified by (a) all five documented PHY configurations, (b) multiple collection sessions/dates, and (c) SNR/Doppler regimes. Prefer whole-session or whole-packet units so temporal correlations are not broken. The exact archive part, file/member selection, and sample counts become a committed derived manifest before evaluation.
+- **Acquisition principle:** The 127 GB raw-IQ volume is **not itself an experimental target**. We need sufficient physical coverage to test a second regime, not maximum data volume. Full-record acquisition is justified only if required to establish the inventory, verify the subset-selection assumptions, or preserve an explicitly required complete-session boundary.
+- **Why continuous/session data matter:** LoRadar's long real-world recordings are valuable not only for packet-level communication metrics but also for session-level temporal analysis: Doppler evolution, frequency/amplitude evolution, temporal correlation, packet spacing, and channel-memory timescales. These are closer to the temporal-memory question motivating MIN than treating every packet as an independent example.
+- **Metric boundary:** Do not assume BER/EVM/SER ground truth merely because packets are present. Where transmitted/reference symbols can be recovered and validated, communication metrics may be used; otherwise use defensible temporal/channel-state metrics and record the absence of direct ground truth.
+- **Local hash requirement:** Verify every acquired ZIP against the publisher MD5; then compute SHA-256 for the acquired archives and extracted source files actually used by experiments.
 - **Precise reason for Tier 1:** It is an independent physical regime from INRIA: satellite-ground communications, different carrier band, HackRF hardware, Doppler, long-duration sessions, and real LoRa traffic. It tests whether any observed MIN behavior survives a major change in propagation and acquisition conditions rather than being a property of one terrestrial dataset.
 
 ### Tier 2 — CYGNSS Level 1 Raw Intermediate Frequency Data Record
@@ -98,6 +102,104 @@ No raw dataset is stored in this repository. The manifest is the source of truth
 - **Subset-selection rule:** If activated, select a small number of complete raw-IF records spanning different spacecraft passes and antenna channels; preserve full records rather than arbitrary windows for the first stress test.
 - **Precise reason for Tier 2:** It provides very raw, instrument-level dynamic RF data that can stress an ingestion pipeline and memory representation outside conventional terrestrial communications. It is valuable as a specialized robustness test but is not the cleanest Paper-1 communications comparison because the signal representation is instrument-specific raw IF counts rather than directly comparable complex baseband IQ.
 
+## Acquisition strategy and physical-evidence boundary
+
+Stage 16 separates **repository reproducibility** from **physical acquisition**.
+
+### Acquisition state machine
+
+Every physical source advances through:
+
+```
+DECLARED
+  ↓
+SOURCE_REACHABLE
+  ↓
+ARCHIVE_ACQUIRED
+  ↓
+PUBLISHER_CHECKSUM_VERIFIED
+  ↓
+LOCAL_HASHED
+  ↓
+INVENTORIED
+  ↓
+SUBSET_FROZEN
+  ↓
+16B-1_COMPLETE
+```
+
+If the execution environment has no outbound access, the state is explicitly **SOURCE_REACHABILITY_BLOCKED**. A blocked acquisition is not converted into a synthetic hash, guessed inventory, or incomplete subset manifest.
+
+### Acquisition environment
+
+Actual third-party archives are acquired on a network-enabled VM, workstation, server, or other reliable external acquisition environment. Ordinary CI must **not** be responsible for downloading the full physical datasets.
+
+The acquisition environment produces a provenance bundle containing, as applicable:
+
+- exact source URL/DOI/version;
+- acquisition timestamp;
+- publisher checksum(s);
+- local SHA-256;
+- archive/file inventory;
+- exact selected member/file paths;
+- member-level hashes where practical;
+- deterministic subset parameters and resulting counts;
+- source/license observations;
+- acquisition tool/version information.
+
+Only the provenance manifests, code, small license-compatible fixtures, and derived summaries are committed to Git. Raw third-party archives remain outside the repository.
+
+### Hash layers
+
+Keep these provenance layers distinct:
+
+| Hash | Meaning |
+|---|---|
+| Publisher checksum | The acquired archive matches the publisher's published object |
+| Local archive SHA-256 | Exact archive bytes used by the acquisition environment |
+| Member/file SHA-256 | Exact source objects that enter the physical experiment |
+
+A missing physical hash is a **blocking condition**, not a value to be inferred.
+
+### LoRadar acquisition rule
+
+LoRadar is intentionally **coverage-driven rather than volume-driven**.
+
+The goal is not to acquire the entire 127 GB raw-IQ corpus merely because it is available. The goal is to establish an auditable subset spanning materially different physical conditions while preserving temporal/session structure.
+
+The order is therefore:
+
+```
+Publisher record
+      ↓
+README + checksums + record inventory
+      ↓
+Determine whether selective acquisition is possible
+      ↓
+Acquire only what is necessary to establish the frozen subset
+      ↓
+Verify publisher checksums
+      ↓
+Compute local SHA-256
+      ↓
+Inventory actual members
+      ↓
+Apply predetermined physical-coverage strata
+      ↓
+Freeze exact subset
+```
+
+If the archive structure makes member selection impossible without acquiring a larger part, acquire that part. Do not claim that a smaller selective acquisition was possible without inspecting the actual source structure.
+
+### Packet-level versus session-level evidence
+
+For LoRadar, preserve both levels where practical:
+
+- **Packet-level:** useful for PHY/communication measurements when valid ground truth can be established.
+- **Session-level:** useful for Doppler evolution, amplitude/frequency evolution, temporal correlation, packet spacing, and channel-memory characterization.
+
+Do not fragment a session solely to increase the number of nominal samples if doing so destroys the temporal structure being tested.
+
 ## Acquisition and hashing policy
 
 For every acquired source:
@@ -106,8 +208,9 @@ For every acquired source:
 2. Verify all publisher-provided checksums before extraction.
 3. Compute and store a local SHA-256 for the exact archive used.
 4. Do not modify raw source bytes. Conditioning, slicing, normalization, synchronization, and conversion are derived stages with their own versioned manifests.
-5. Raw data are not committed to Git. Only manifests, code, small license-compatible fixtures, and derived summary artifacts belong in the repository.
+5. Do not commit raw third-party datasets to Git. Only provenance manifests, code, small license-compatible fixtures, and derived summary artifacts belong in the repository.
 6. Any redistribution statement in the paper must use the verified license state at the time of publication, not this initial audit alone.
+7. A physical dataset is not considered frozen until the exact archive/version, publisher checksum verification, local SHA-256, inventory, and deterministic subset manifest are all available.
 
 ## Paper-1 minimum set
 
@@ -119,6 +222,48 @@ The minimum Stage-16 evidence set is:
 
 This set is deliberately small. The design objective is coverage of distinct signal regimes, not the largest possible dataset count.
 
-## Gate before 16A ingestion implementation
+The physical evidence gate requires **two materially different Tier-1 regimes** before making a general physical-data claim.
 
-Physical acquisition code must not be treated as complete until the selected archive/version is frozen, license status is recorded, publisher checksums are verified, and the exact derived subset manifest is committed.
+## Stage-16 progression
+
+The dataset acquisition plan feeds the following controlled sequence:
+
+```
+16A  dataset definition + provenance contract
+ ↓
+16B-1  physical acquisition + hashing + exact subset freeze
+ ↓
+16B-2  physical-IQ characterization
+ ↓
+16C  linear MIN vs matched FIR/IIR/state-space baselines
+ ↓
+16D  cross-condition robustness
+ ↓
+16E  independent physical validation
+ ↓
+16F  paper evidence freeze
+ ↓
+Paper-1 decision gate
+ ↓
+17+ nonlinear/adaptive/hierarchical MIN
+```
+
+No nonlinear MIN, adaptive MIN, or MIN-specific modulation scheme is introduced merely to improve the Stage-16 result. Stage 16 is the evidence gate for the current linear/SOE construction.
+
+## Gate before 16B-2
+
+**16B-2 must not begin as a physical experiment until 16B-1 is physically complete for the selected dataset.**
+
+Completion requires:
+
+- selected archive/version frozen;
+- source/license status recorded;
+- publisher checksum(s) verified;
+- local SHA-256 recorded;
+- actual archive/member inventory available;
+- deterministic subset selection completed;
+- exact selected member/file list committed;
+- no fabricated or inferred physical hashes;
+- provenance manifest committed and CI-validated.
+
+If acquisition is blocked by network access, the repository remains in the explicit blocked state and no physical-data claims are made.

@@ -1,0 +1,51 @@
+name: Experiment 16B-1 Acquisition
+
+on:
+  push:
+    paths:
+      - "experiments/16B_1_acquisition.py"
+      - "tests/test_16b1_acquisition.py"
+      - "docs/16B_1_ACQUISITION_PLAN.json"
+      - "docs/16B_1_ACQUISITION_FREEZE.md"
+      - ".github/workflows/experiment-16b-1-acquisition.yml"
+  pull_request:
+    paths:
+      - "experiments/16B_1_acquisition.py"
+      - "tests/test_16b1_acquisition.py"
+      - "docs/16B_1_ACQUISITION_PLAN.json"
+      - "docs/16B_1_ACQUISITION_FREEZE.md"
+      - ".github/workflows/experiment-16b-1-acquisition.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: 16b-1-acquisition
+  cancel-in-progress: true
+
+jobs:
+  acquisition-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[test]"
+      - run: pytest -q tests/test_16b1_acquisition.py
+      - run: python experiments/16B_1_acquisition.py --self-test --output /tmp/16b1-acquisition-fixture.json
+      - name: Validate fixture manifest
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("/tmp/16b1-acquisition-fixture.json")
+          d = json.loads(p.read_text())
+          assert d["raw_data_policy"]["stored_in_git"] is False
+          assert d["subset"]["selection_is_order_independent"] is True
+          assert d["subset"]["selected_member_count"] == 2
+          print("16B-1 acquisition contract: PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-16b-1-acquisition-fixture
+          path: /tmp/16b1-acquisition-fixture.json
