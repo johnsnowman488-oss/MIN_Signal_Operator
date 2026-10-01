@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "stage": "16B-1",
+  "acquisition_plan": "paper1_physical_minimum",
+  "raw_data_in_repo": false,
+  "sources": [
+    {
+      "dataset_id": "inria_iq_rf_fingerprinting",
+      "exact_release": "v1.0.0",
+      "doi": "10.5281/zenodo.18268648",
+      "source_page": "https://zenodo.org/records/18268648",
+      "archive": "PLA_dataset.zip",
+      "download_url": "https://zenodo.org/records/18268648/files/PLA_dataset.zip?download=1",
+      "publisher_checksum": {
+        "algorithm": "md5",
+        "value": "aff583bee6f4efccd08fe78c731bf03d"
+      },
+      "local_sha256": null,
+      "acquisition_status": "pending_operator_download",
+      "subset_status": "pending_inventory",
+      "subset_rule": {
+        "strategy": "all_devices_when_feasible_else_balanced_cap",
+        "grouping_keys": [
+          "device_id",
+          "file_or_trial_id",
+          "burst_identity"
+        ],
+        "split_boundary": "device/session/file identity",
+        "seed": 1601
+      }
+    },
+    {
+      "dataset_id": "loradar",
+      "exact_release": "v1",
+      "doi": "10.5281/zenodo.16302856",
+      "source_page": "https://zenodo.org/records/16302856",
+      "acquisition_status": "pending_operator_download",
+      "subset_status": "pending_inventory",
+      "parts": [
+        {
+          "part": "lora_part001.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part001.zip?download=1"
+        },
+        {
+          "part": "lora_part002.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part002.zip?download=1"
+        },
+        {
+          "part": "lora_part003.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part003.zip?download=1"
+        },
+        {
+          "part": "lora_part004.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part004.zip?download=1"
+        },
+        {
+          "part": "lora_part005.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part005.zip?download=1"
+        },
+        {
+          "part": "lora_part006.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part006.zip?download=1"
+        },
+        {
+          "part": "lora_part007.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part007.zip?download=1"
+        },
+        {
+          "part": "lora_part008.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part008.zip?download=1"
+        },
+        {
+          "part": "lora_part009.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part009.zip?download=1"
+        },
+        {
+          "part": "lora_part010.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part010.zip?download=1"
+        },
+        {
+          "part": "lora_part011.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part011.zip?download=1"
+        },
+        {
+          "part": "lora_part012.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part012.zip?download=1"
+        },
+        {
+          "part": "lora_part013.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part013.zip?download=1"
+        },
+        {
+          "part": "lora_part014.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part014.zip?download=1"
+        },
+        {
+          "part": "lora_part015.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part015.zip?download=1"
+        },
+        {
+          "part": "lora_part016.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part016.zip?download=1"
+        },
+        {
+          "part": "lora_part017.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part017.zip?download=1"
+        },
+        {
+          "part": "lora_part018.zip",
+          "download_url": "https://zenodo.org/records/16302856/files/lora_part018.zip?download=1"
+        }
+      ],
+      "publisher_checksums": {
+        "algorithm": "md5",
+        "values": [
+          "bd8faca381a29cf7269ef61bee69f40b",
+          "8f484a7a07d11c16309bf92b04539825",
+          "755e1710992c252655f8326595c52ba4",
+          "c8493be44c905a42daa9da0fce16b458",
+          "c4dcf198d44e2581a9eca0547a57a9c7",
+          "3733fd3eb5f24c5257f46b2726c5ffd8",
+          "f21480ff542eab21f7f026aa7db9ed3d",
+          "64e43b65f66ffd19f73883d85343bd25",
+          "d835973c613084b5040b05cb2e489b0b",
+          "e1a8ecd27d1237d59b218783fc5c17f9",
+          "1f4f3580419bafa83362ae7c1c218dd5",
+          "d7a92d8ada46a689b47b8ebce6c82198",
+          "3680b76abdaeba9e6f3fb83371d47791e",
+          "c4b8b32eb616cc02f32491e5d67b895e",
+          "0dc4d87a8f58ad596dc02f404f7fb942",
+          "f8cd5d4574bd3d214ae0f4e8e8f4856e",
+          "1787fa8cdc5a294048207349355a0194",
+          "1aa6243bbc17ed42910ec396dc75de00"
+        ]
+      },
+      "subset_rule": {
+        "strategy": "stratified_whole_session_or_packet_units",
+        "required_strata": [
+          "documented_phy_configuration",
+          "collection_date_or_session",
+          "snr_or_doppler_regime_when_available"
+        ],
+        "seed": 1601,
+        "freeze_before_evaluation": true
+      }
+    }
+  ]
+}
