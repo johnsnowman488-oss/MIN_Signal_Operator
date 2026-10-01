@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.0",
+  "stage": "16A",
+  "manifest_audit_date": "2026-10-01",
+  "repository": {
+    "name": "johnsnowman488-oss/MIN_Signal_Operator",
+    "baseline_commit": "1eeb08fdb14ad2fefffe87d742af4ef0d89a564f"
+  },
+  "policy": {
+    "raw_data_in_repo": false,
+    "local_hash_algorithm": "SHA-256",
+    "publisher_checksum_verification_required": true,
+    "redistribution_license_reverification_required": true
+  },
+  "tiers": {
+    "tier_0": {
+      "role": "Synthetic/historical control and regression bridge",
+      "paper_1_required": true
+    },
+    "tier_1": {
+      "role": "Genuine physical RF/IQ validation",
+      "paper_1_required": true,
+      "minimum_independent_physical_regimes": 2
+    },
+    "tier_2": {
+      "role": "Specialized physical stress validation",
+      "paper_1_required": false
+    }
+  },
+  "datasets": [
+    {
+      "id": "radioml_2016_10a",
+      "tier": 0,
+      "title": "RadioML 2016.10A",
+      "source": {
+        "publisher": "DeepSig",
+        "url": "https://www.deepsig.ai/datasets/",
+        "doi": null,
+        "exact_release": "2016.10A",
+        "version_status": "Historical dataset release identifier; no DOI/version tag shown on current source page"
+      },
+      "license": {
+        "status": "verified",
+        "name": "CC BY-NC-SA 4.0",
+        "source_note": "DeepSig license notice states all datasets on the page use CC BY-NC-SA 4.0",
+        "verification_source": "DeepSig historical datasets page"
+      },
+      "format": {
+        "container": "pickle",
+        "sample_representation": "Historical RadioML signal arrays; exact wire dtype/layout to be asserted during ingestion",
+        "header": "dataset-level serialized object"
+      },
+      "acquisition": {
+        "physical": false,
+        "generator": "GNU Radio",
+        "modulation_classes": 11,
+        "snr": "varying"
+      },
+      "metadata_fields": [
+        "modulation_class",
+        "SNR",
+        "example_index"
+      ],
+      "subset_rule": "Deterministic stratification across every modulation x SNR cell used by Stage-16 control runs; commit exact example indices.",
+      "hashes": {
+        "publisher": [],
+        "local_sha256": null,
+        "status": "pending_acquisition"
+      },
+      "reason_for_tier": "Synthetic historical control for continuity with the 15-series and regression protection; not physical evidence."
+    },
+    {
+      "id": "radioml_2018_01a",
+      "tier": 0,
+      "title": "RadioML 2018.01A",
+      "source": {
+        "publisher": "DeepSig",
+        "url": "https://www.deepsig.ai/datasets/",
+        "doi": null,
+        "exact_release": "2018.01A",
+        "version_status": "Historical dataset release identifier; no DOI/version tag shown on current source page"
+      },
+      "license": {
+        "status": "verified",
+        "name": "CC BY-NC-SA 4.0",
+        "source_note": "DeepSig license notice states all datasets on the page use CC BY-NC-SA 4.0",
+        "verification_source": "DeepSig historical datasets page"
+      },
+      "format": {
+        "container": "HDF5",
+        "sample_representation": "Complex floating point",
+        "examples": 2000000,
+        "samples_per_example": 1024
+      },
+      "acquisition": {
+        "physical": false,
+        "simulated_channel_effects": true,
+        "modulation_classes": 24
+      },
+      "metadata_fields": [
+        "modulation_type",
+        "dataset_condition",
+        "SNR",
+        "example_index"
+      ],
+      "subset_rule": "Deterministic stratification across modulation x SNR/condition cells; commit exact example indices.",
+      "hashes": {
+        "publisher": [],
+        "local_sha256": null,
+        "status": "pending_acquisition"
+      },
+      "reason_for_tier": "Broader synthetic regression bridge with simulated channel effects; still not physical validation."
+    },
+    {
+      "id": "inria_iq_rf_fingerprinting",
+      "tier": 1,
+      "title": "INRIA I/Q Signal Dataset for RF Fingerprinting and Physical Layer Authentication",
+      "source": {
+        "publisher": "Centre Inria de l'Université de Lille / University of Cambridge",
+        "url": "https://zenodo.org/records/18268648",
+        "doi": "10.5281/zenodo.18268648",
+        "exact_release": "v1.0.0",
+        "publication_date": "2026-01-16"
+      },
+      "license": {
+        "status": "unverified",
+        "name": null,
+        "landing_page_observation": "Current Zenodo Rights > License field is blank",
+        "redistribution_allowed": null,
+        "action_required": "Inspect archive README/license or obtain explicit permission before redistribution"
+      },
+      "files": [
+        {
+          "name": "PLA_dataset.zip",
+          "publisher_md5": "aff583bee6f4efccd08fe78c731bf03d",
+          "size_mb": 710.7,
+          "local_sha256": null
+        }
+      ],
+      "format": {
+        "container": "ZIP archive containing raw binary files",
+        "data_files": "headerless .bin",
+        "sample_representation": "complex64-equivalent; interleaved float32 I,Q",
+        "sampling_rate_hz": 20000000,
+        "center_frequency_hz": 2400000000
+      },
+      "acquisition": {
+        "physical": true,
+        "receiver": "BladeRF AX4",
+        "software": "GNU Radio",
+        "transmitters": "COTS wireless devices including NRF52840-class devices",
+        "burst_structure": "transient turn-on plus steady-state"
+      },
+      "metadata_fields": [
+        "device_id",
+        "file_or_trial_id",
+        "burst_identity",
+        "transient_vs_steady_state_region",
+        "receiver_hardware",
+        "sampling_rate",
+        "center_frequency"
+      ],
+      "subset_rule": "Primary run: all released device IDs with split by device/session/file identity. Compute-limited run: deterministic balanced cap per device with selected filenames committed.",
+      "hashes": {
+        "publisher": [
+          {
+            "file": "PLA_dataset.zip",
+            "algorithm": "MD5",
+            "value": "aff583bee6f4efccd08fe78c731bf03d"
+          }
+        ],
+        "local_sha256": null,
+        "status": "pending_acquisition"
+      },
+      "reason_for_tier": "Core terrestrial physical validation: real SDR/IQ, device-specific hardware impairments, transient memory, fixed 2.4 GHz/20 Msps acquisition."
+    },
+    {
+      "id": "loradar",
+      "tier": 1,
+      "title": "LoRadar: A Raw IQ Dataset of Satellite-Ground LoRa Communication Signals",
+      "source": {
+        "publisher": "Liu, Shuo; Li, Qing",
+        "url": "https://zenodo.org/records/16302856",
+        "doi": "10.5281/zenodo.16302856",
+        "exact_release": "v1",
+        "publication_date": "2025-07-22"
+      },
+      "license": {
+        "status": "unverified",
+        "name": null,
+        "landing_page_observation": "Current Zenodo Rights > License field is blank",
+        "redistribution_allowed": null,
+        "action_required": "Inspect archive README/license or obtain explicit permission before redistribution"
+      },
+      "format": {
+        "container": "split ZIP archives containing raw binary files",
+        "data_files": "headerless .bin",
+        "sample_representation": "complex64; interleaved float32 I,Q",
+        "sampling_rate_hz": 4000000,
+        "frequency_range_hz": [
+          399000000,
+          403000000
+        ]
+      },
+      "acquisition": {
+        "physical": true,
+        "receiver": "HackRF SDR",
+        "terminal": "single rooftop LoRa ground terminal",
+        "satellite_regime": "LEO satellite overpasses",
+        "collection_dates": [
+          "2025-05-05",
+          "2025-05-17"
+        ],
+        "session_files": 181,
+        "valid_lora_packets": 6664,
+        "packet_sparsity_fraction": 0.03
+      },
+      "documented_phy_configurations": [
+        {
+          "center_frequency_mhz": 402.72,
+          "bandwidth_khz": 125,
+          "spreading_factor": 10,
+          "proportion": 0.2486
+        },
+        {
+          "center_frequency_mhz": 402.629,
+          "bandwidth_khz": 62.5,
+          "spreading_factor": 10,
+          "proportion": 0.2441
+        },
+        {
+          "center_frequency_mhz": 401.944,
+          "bandwidth_khz": 62.5,
+          "spreading_factor": 10,
+          "proportion": 0.2538
+        },
+        {
+          "center_frequency_mhz": 401.494,
+          "bandwidth_khz": 250,
+          "spreading_factor": 11,
+          "proportion": 0.1354
+        },
+        {
+          "center_frequency_mhz": 399.929,
+          "bandwidth_khz": 62.5,
+          "spreading_factor": 10,
+          "proportion": 0.1181
+        }
+      ],
+      "metadata_fields": [
+        "session_id_or_file",
+        "collection_date",
+        "center_frequency",
+        "bandwidth",
+        "spreading_factor",
+        "packet_identity_or_location",
+        "SNR_if_released",
+        "Doppler_if_released"
+      ],
+      "subset_rule": "Deterministic stratification over all five documented PHY configurations, multiple collection sessions/dates, and SNR/Doppler regimes. Select whole sessions or packet units; commit exact file/part list and counts before evaluation.",
+      "hashes": {
+        "publisher": [
+          {
+            "file": "README.md",
+            "algorithm": "MD5",
+            "value": "9fef031bd6cdec3ea1aa38e9dfc9238a"
+          },
+          {
+            "file": "lora_part001.zip",
+            "algorithm": "MD5",
+            "value": "bd8faca381a29cf7269ef61bee69f40b"
+          },
+          {
+            "file": "lora_part002.zip",
+            "algorithm": "MD5",
+            "value": "8f484a7a07d11c16309bf92b04539825"
+          },
+          {
+            "file": "lora_part003.zip",
+            "algorithm": "MD5",
+            "value": "755e1710992c252655f8326595c52ba4"
+          },
+          {
+            "file": "lora_part004.zip",
+            "algorithm": "MD5",
+            "value": "c8493be44c905a42daa9da0fce16b458"
+          },
+          {
+            "file": "lora_part005.zip",
+            "algorithm": "MD5",
+            "value": "c4dcf198d44e2581a9eca0547a57a9c7"
+          },
+          {
+            "file": "lora_part006.zip",
+            "algorithm": "MD5",
+            "value": "3733fd3eb5f24c5257f46b2726c5ffd8"
+          },
+          {
+            "file": "lora_part007.zip",
+            "algorithm": "MD5",
+            "value": "f21480ff542eab21f7f026aa7db9ed3d"
+          },
+          {
+            "file": "lora_part008.zip",
+            "algorithm": "MD5",
+            "value": "64e43b65f66ffd19f73883d85343bd25"
+          },
+          {
+            "file": "lora_part009.zip",
+            "algorithm": "MD5",
+            "value": "d835973c613084b5040b05cb2e489b0b"
+          },
+          {
+            "file": "lora_part010.zip",
+            "algorithm": "MD5",
+            "value": "e1a8ecd27d1237d59b218783fc5c17f9"
+          },
+          {
+            "file": "lora_part011.zip",
+            "algorithm": "MD5",
+            "value": "1f4f3580419bafa83362ae7c1c218dd5"
+          },
+          {
+            "file": "lora_part012.zip",
+            "algorithm": "MD5",
+            "value": "d7a92d8ada46a689b47b8ebce6c82198"
+          },
+          {
+            "file": "lora_part013.zip",
+            "algorithm": "MD5",
+            "value": "3680b76abdaeba9e6f3fb83371d47791"
+          },
+          {
+            "file": "lora_part014.zip",
+            "algorithm": "MD5",
+            "value": "c4b8b32eb616cc02f32491e5d67b895e"
+          },
+          {
+            "file": "lora_part015.zip",
+            "algorithm": "MD5",
+            "value": "0dc4d87a8f58ad596dc02f404f7fb942"
+          },
+          {
+            "file": "lora_part016.zip",
+            "algorithm": "MD5",
+            "value": "f8cd5d4574bd3d214ae0f4e8e8f4856e"
+          },
+          {
+            "file": "lora_part017.zip",
+            "algorithm": "MD5",
+            "value": "1787fa8cdc5a294048207349355a0194"
+          },
+          {
+            "file": "lora_part018.zip",
+            "algorithm": "MD5",
+            "value": "1aa6243bbc17ed42910ec396dc75de00"
+          }
+        ],
+        "local_sha256": null,
+        "status": "pending_acquisition"
+      },
+      "reason_for_tier": "Independent physical regime: satellite-ground LoRa, LEO Doppler, different band and SDR hardware, long sessions, real traffic. Tests whether findings survive a major regime change."
+    },
+    {
+      "id": "cygnss_l1_raw_if",
+      "tier": 2,
+      "title": "CYGNSS Level 1 Raw Intermediate Frequency Data Record",
+      "source": {
+        "publisher": "NASA / CYGNSS",
+        "url": "https://data.nasa.gov/dataset/cygnss-level-1-raw-intermediate-frequency-data-record-92b63",
+        "doi": "10.5067/CYGNS-L1RIF",
+        "exact_release": "Catalog identifier; no simple semantic version exposed by current record",
+        "catalog_last_updated": "2026-09-22"
+      },
+      "license": {
+        "status": "source_catalogued",
+        "name": "US Government Works (catalog metadata link)",
+        "url": "https://www.usa.gov/government-works",
+        "redistribution_allowed": null,
+        "note": "Record this source-level statement without generalizing it to ancillary/derived materials."
+      },
+      "format": {
+        "core_data": "raw IF sensor counts",
+        "resource_formats": [
+          "BIN",
+          "PDF",
+          "TXT",
+          "JPEG",
+          "ISO"
+        ],
+        "complex_baseband_ready": false
+      },
+      "acquisition": {
+        "physical": true,
+        "instrument": "CYGNSS Delay Doppler Mapping Instrument",
+        "antenna_channels": 3,
+        "record_duration_seconds": "30-90, typically 60",
+        "collection_trigger": "ground-commanded around spacecraft overpasses"
+      },
+      "metadata_fields": [
+        "record_id",
+        "spacecraft_or_overpass_context",
+        "target_area",
+        "time",
+        "antenna_channel",
+        "resource_format"
+      ],
+      "subset_rule": "Optional stress set: complete records from multiple spacecraft passes and antenna channels; preserve full-record boundaries in first use.",
+      "hashes": {
+        "publisher": [
+          {
+            "object": "NASA catalog metadata",
+            "algorithm": "SHA-256",
+            "value": "f07a0b4a93d96ecd24d5f0b3d474f016b0ff5a3039868b9f3c5a047601893581",
+            "is_data_file_hash": false
+          }
+        ],
+        "local_sha256": null,
+        "status": "pending_acquisition"
+      },
+      "reason_for_tier": "Specialized raw-IF stress test outside convenient complex-baseband terrestrial communication data; useful for ingestion/robustness but not required for the minimum Paper-1 evidence."
+    }
+  ],
+  "paper_1_minimum_set": {
+    "tier_0": [
+      "radioml_2016_10a",
+      "radioml_2018_01a"
+    ],
+    "tier_1": [
+      "inria_iq_rf_fingerprinting",
+      "loradar"
+    ],
+    "tier_2_optional": [
+      "cygnss_l1_raw_if"
+    ],
+    "rationale": "Two synthetic controls plus two materially different physical regimes provides a small, coverage-driven evidence set without requiring bulk download of multi-terabyte archives."
+  }
+}
