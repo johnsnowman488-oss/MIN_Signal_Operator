@@ -1,0 +1,39 @@
+name: Experiment 16B-1
+
+on:
+  push:
+    paths:
+      - "experiments/16B_1_iq_ingestion.py"
+      - "tests/test_experiment_16b1.py"
+      - "docs/16B_1_IQ_INGESTION.md"
+      - ".github/workflows/experiment-16b-1.yml"
+      - "pyproject.toml"
+  pull_request:
+    paths:
+      - "experiments/16B_1_iq_ingestion.py"
+      - "tests/test_experiment_16b1.py"
+      - "docs/16B_1_IQ_INGESTION.md"
+      - ".github/workflows/experiment-16b-1.yml"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+concurrency:
+  group: 16b-1-ingestion
+  cancel-in-progress: true
+
+jobs:
+  run-16b-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[test]"
+      - run: pytest -q tests/test_experiment_16b1.py
+      - run: python experiments/16B_1_iq_ingestion.py --self-test --output experiments/results/16B_1_iq_ingestion_selftest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experiment-16b-1-results
+          path: experiments/results/16B_1_iq_ingestion_selftest.json
