@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "inria_iq_rf_fingerprinting",
+  "title": "INRIA I/Q Signal Dataset for RF Fingerprinting and Physical Layer Authentication",
+  "release": "v1.0.0",
+  "doi": "10.5281/zenodo.18268648",
+  "source_page": "https://zenodo.org/records/18268648",
+  "download_url": "https://zenodo.org/records/18268648/files/PLA_dataset.zip?download=1",
+  "archive_filename": "PLA_dataset.zip",
+  "publisher_checksum": {
+    "algorithm": "md5",
+    "value": "aff583bee6f4efccd08fe78c731bf03d"
+  },
+  "expected_archive_bytes": null,
+  "local_sha256": null,
+  "licence_status": "must_be_confirmed_from_record_metadata_before_research_use",
+  "acquisition_status": "not_yet_acquired",
+  "subset_status": "not_yet_inventoried",
+  "sample_format_claim": "interleaved float32 I/Q, headerless",
+  "sample_rate_hz_claim": 20000000,
+  "center_frequency_hz_claim": 2400000000,
+  "claims_source": "Zenodo dataset record; re-check against release documentation and actual members",
+  "subset_policy": {
+    "freeze_before_evaluation": true,
+    "grouping_keys": ["device_id", "trial_or_file_id", "burst_identity"],
+    "split_boundary": "device/session/file identity as supported by actual metadata",
+    "seed": 1601,
+    "selection_rule": "Do not freeze selected members until archive inventory, licence, metadata, and scientific suitability have been reviewed."
+  },
+  "reproducibility": {
+    "raw_archive_in_git": false,
+    "archive_location_default": "data/external/inria_pla/PLA_dataset.zip",
+    "generated_reports": [
+      "data/external/inria_pla/acquisition_report.json",
+      "data/external/inria_pla/archive_inventory.json"
+    ],
+    "verification_command": "python scripts/acquire_inria_pla.py verify",
+    "inventory_command": "python scripts/acquire_inria_pla.py inventory"
+  },
+  "citation": {
+    "dataset_doi": "10.5281/zenodo.18268648",
+    "related_paper_doi": "10.1109/ACSAC63791.2024.00094",
+    "paper_title": "Robust Device Authentication in Multi-Node Networks: ML-Assisted Hybrid PLA Exploiting Hardware Impairments"
+  }
+}
