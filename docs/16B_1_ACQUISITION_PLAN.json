@@ -16,8 +16,8 @@
         "value": "aff583bee6f4efccd08fe78c731bf03d"
       },
       "local_sha256": null,
-      "acquisition_status": "pending_operator_download",
-      "subset_status": "pending_inventory",
+      "acquisition_status": "tooling_prepared_archive_not_yet_acquired",
+      "subset_status": "pending_acquisition_inventory_and_review",
       "subset_rule": {
         "strategy": "all_devices_when_feasible_else_balanced_cap",
         "grouping_keys": [
@@ -144,5 +144,19 @@
         "freeze_before_evaluation": true
       }
     }
-  ]
+  ],
+  "acquisition_tooling": {
+    "status": "implemented_pending_operator_execution",
+    "lock_file": "datasets/inria_pla/dataset.lock.json",
+    "script": "scripts/acquire_inria_pla.py",
+    "runbook": "docs/16B_1_INRIA_ACQUISITION_RUNBOOK.md",
+    "commands": [
+      "python scripts/acquire_inria_pla.py acquire",
+      "python scripts/acquire_inria_pla.py verify",
+      "python scripts/acquire_inria_pla.py inventory",
+      "python -m unittest discover -s tests -p test_dataset_acquisition.py -v"
+    ],
+    "raw_archive_in_git": false,
+    "notes": "The local SHA-256, expected archive size, member inventory and frozen subset remain unset until acquisition is run and the licence/metadata/suitability review is complete."
+  }
 }
